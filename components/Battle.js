@@ -36,7 +36,7 @@ export default function Battle({ boss, state, onAnswer, onNext }) {
       <div className="flex items-center justify-between font-pixel text-[8px] sm:text-[10px] gap-2 pr-10">
         <span className="text-cyanx whitespace-nowrap"><span className="hidden sm:inline">ROUND </span><span className="sm:hidden">R</span>{round + 1}/{rounds.length}</span>
         <span className={`px-2 py-1 border-2 border-black whitespace-nowrap ${q.kind === 'tool' ? 'bg-cyanx text-navy' : 'bg-neon text-white'}`}>
-          {q.kind === 'tool' ? <>🧰 <span className="hidden sm:inline">AI </span>TOOL<span className="hidden sm:inline"> CHECK</span></> : <>⚙️ WORKFLOW</>}
+          {q.kind === 'tool' ? <>🤖 AI BASICS</> : <>💼 <span className="hidden sm:inline">WORK </span>PROBLEM</>}
         </span>
         <span className="text-gold whitespace-nowrap"><span className="hidden sm:inline">SCORE </span>{String(score).padStart(3, '0')}</span>
         <span className={`whitespace-nowrap ${streak >= 2 ? 'text-bad animate-pulse' : 'text-gray-400'}`} title="Correct answers in a row">

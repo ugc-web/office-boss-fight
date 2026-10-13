@@ -19,8 +19,8 @@ Deploy: push to GitHub and import the repo in Vercel (no config needed). You can
 
 | Path | Purpose |
 |---|---|
-| `lib/data/*.mjs` | One file per boss: personality lines, 1 workflow question, a pool of AI-tool questions |
-| `lib/bosses.mjs` | Combines the bosses, plus the hero, end messages, taglines and the AI toolkit cheat sheet |
+| `lib/data/*.mjs` | One file per boss: personality lines, 1 work-problem question, a pool of 3 AI-basics questions |
+| `lib/bosses.mjs` | Combines the bosses, plus the hero, end messages, taglines and the "What AI can do for you" sheet with the 3 golden rules |
 | `lib/game.mjs` | Pure game rules: rounds, HP, boss HP, score, streak, Chai Break, KO/escape, end states, titles |
 | `lib/game.test.mjs` | Unit tests for the rules and the content |
 | `lib/analytics.js` | `track()` sends events to Vercel Analytics / gtag / Plausible if present, plus a localStorage log (`obf_events`) |
@@ -29,7 +29,7 @@ Deploy: push to GitHub and import the repo in Vercel (no config needed). You can
 | `components/` | `Game` (screen flow), `Landing`, `BossIntro` (VS card), `Battle` + `Arena` (fight scene), `Results`, `Extras`, `ui` |
 
 ## Rules
-- 100 HP. 5 bosses, each with 2 rounds: a workflow question, then a random AI-tool question (images, video, voice, music, research, code, meetings, slides, data). 10 rounds in total.
+- 100 HP. 5 bosses, each with 2 rounds: a work-problem question, then a random AI-basics question (writing, tone, translating, checking AI mistakes, privacy, pictures, fake photos, voice, planning, recording consent). 10 rounds in total.
 - Options are shuffled. One attempt per question, no retries.
 - Correct answer: +10 score and 50% boss damage (2 hits = K.O.). Wrong answer: -20 HP, a roast, and the boss throws something at you. If you miss the second hit, the boss escapes undefeated.
 - 3 correct in a row: Chai Break, +10 HP (max 100). A wrong answer resets the streak.
@@ -43,3 +43,6 @@ To send them to Vercel, add `@vercel/analytics` and its `<Analytics />` componen
 
 ## Sharing
 Uses `navigator.share` when available, with a clipboard fallback. Challenge links look like `/?challenge=80` and show a banner on the landing page.
+
+## Audience & writing style
+The game is for people **without a tech background**. The questions use plain everyday language and office situations, with no jargon (no formulas, scripts or file formats). They teach what AI is good at, and the 3 golden rules: *check its work, keep secrets out, be clear*. The test `content is beginner-friendly` fails if jargon words or long answers are added.

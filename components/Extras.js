@@ -1,4 +1,4 @@
-import { TOOLKIT, findQuestion } from '@/lib/bosses.mjs';
+import { TOOLKIT, GOLDEN_RULES, findQuestion } from '@/lib/bosses.mjs';
 
 export function StudyNotes({ missed, open }) {
   const items = missed.map(findQuestion).filter(Boolean);
@@ -9,7 +9,7 @@ export function StudyNotes({ missed, open }) {
       <ul className="mt-3 space-y-3">
         {items.map(({ boss, q }) => (
           <li key={q.id} className="text-lg border-l-4 pl-3" style={{ borderColor: boss.color }}>
-            <p className="text-gray-400 text-base">{boss.name} · {q.kind === 'tool' ? 'AI tool' : 'Workflow'}</p>
+            <p className="text-gray-400 text-base">{boss.name} · {q.kind === 'tool' ? 'AI basics' : 'Work problem'}</p>
             <p className="text-white">{q.scenario}</p>
             <p className="text-good">✔ {q.options.find((o) => o.correct).text}</p>
           </li>
@@ -21,8 +21,14 @@ export function StudyNotes({ missed, open }) {
 
 export function Toolkit() {
   return (
-    <details className="panel p-3">
-      <summary className="font-pixel text-[10px] text-cyanx cursor-pointer">🧰 AI TOOLKIT CHEAT SHEET</summary>
+    <details className="panel p-3" open>
+      <summary className="font-pixel text-[10px] text-cyanx cursor-pointer">🤖 WHAT AI CAN DO FOR YOU</summary>
+      <div className="mt-3 border-[3px] border-black bg-gold/10 p-3" style={{ boxShadow: '0 0 0 2px #fbbf24' }}>
+        <p className="font-pixel text-[9px] text-gold mb-2">⭐ 3 GOLDEN RULES</p>
+        <ol className="space-y-1 text-lg leading-tight list-decimal pl-5">
+          {GOLDEN_RULES.map((r) => <li key={r}>{r}</li>)}
+        </ol>
+      </div>
       <ul className="mt-3 grid sm:grid-cols-2 gap-2">
         {TOOLKIT.map((t) => (
           <li key={t.job} className="bg-black/30 border-2 border-black p-2 text-lg leading-tight">
@@ -33,8 +39,8 @@ export function Toolkit() {
           </li>
         ))}
       </ul>
-      <p className="text-base text-gray-500 mt-2">
-        Always use tools your company has approved, and check what they produce. Tool names are examples, not endorsements.
+      <p className="text-base text-gray-400 mt-2">
+        Popular free AI assistants include ChatGPT, Google Gemini and Microsoft Copilot. At work, use the one your company has approved.
       </p>
     </details>
   );

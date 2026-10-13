@@ -9,10 +9,10 @@ const url = process.env.NEXT_PUBLIC_SITE_URL || 'https://office-boss-fight.verce
 export const metadata = {
   metadataBase: new URL(url),
   title: 'Office Boss Fight: Use AI to Survive the Workday',
-  description: 'Fight office villains using the right AI tools. Survive the workday. Become the AI Overlord.',
+  description: 'A fun, easy game that teaches anyone how to use AI at work. No tech skills needed.',
   openGraph: {
     title: 'Office Boss Fight',
-    description: 'Fire prompt arrows at the Inbox Hydra, Excel Monster & Deadline Dragon. Learn which AI tool does what.',
+    description: 'Beat the Inbox Hydra, Excel Monster & Deadline Dragon with AI. A fun, easy AI game for everyone. No tech skills needed.',
     type: 'website',
   },
   twitter: { card: 'summary', title: 'Office Boss Fight', description: 'Become the AI Overlord.' },

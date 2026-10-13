@@ -28,9 +28,9 @@ export default function Landing({ onStart, best, challenge }) {
         <div className="flex flex-col sm:flex-row items-center sm:items-end justify-between gap-3 sm:gap-2">
           <div className="flex flex-col items-center shrink-0">
             <div className="bubble bubble-l text-base mb-3 max-w-[10rem]">
-              <Typewriter text="I have a prompt for that." />
+              <Typewriter text="AI can help with that!" />
             </div>
-            <Sprite name="hero" size={64} className="animate-bob" title="The Intern, Prompt Archer" />
+            <Sprite name="hero" size={64} className="animate-bob" title="The Intern, AI Archer" />
             <p className="font-pixel text-[8px] text-cyanx mt-2">THE INTERN</p>
           </div>
           <span className="font-pixel text-2xl sm:text-3xl text-gold text-glow animate-vs self-center">VS</span>
@@ -43,14 +43,14 @@ export default function Landing({ onStart, best, challenge }) {
           </div>
         </div>
         <p className="text-lg sm:text-xl text-gray-300 mt-4">
-          Five workplace nightmares. Ten questions. Fire <span className="text-cyanx">prompt arrows</span> by picking the right AI move, and learn which AI tool does what along the way.
+          Five office nightmares. Ten easy questions. Fire <span className="text-cyanx">AI arrows</span> by picking the smartest way to use AI. No tech skills needed.
         </p>
       </div>
 
       <ul className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-lg">
         {[
           ['❤️', '100 HP', 'Wrong = −20'],
-          ['🏹', '2 hits per boss', 'Workflow + AI tool'],
+          ['🏹', '2 hits per boss', 'Work problem + AI basics'],
           ['☕', 'Chai Break', '3 in a row = +10 HP'],
           ['⏱️', '3 minutes', 'Share your title'],
         ].map(([icon, a, b]) => (
