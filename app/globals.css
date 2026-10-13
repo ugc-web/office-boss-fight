@@ -2,36 +2,67 @@
 @tailwind components;
 @tailwind utilities;
 
-html, body { background: #0f1226; color: #e5e7eb; }
+html, body { background: #05060f; color: #e5e7eb; overflow-x: hidden; }
 body {
-  background-image:
-    linear-gradient(rgba(168,85,247,0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(34,211,238,0.06) 1px, transparent 1px);
-  background-size: 24px 24px;
+  background:
+    radial-gradient(ellipse at 50% -10%, rgba(168,85,247,0.35), transparent 55%),
+    radial-gradient(ellipse at 50% 110%, rgba(34,211,238,0.18), transparent 50%),
+    #05060f;
+  background-attachment: fixed;
 }
 
 @layer components {
-  .pixel-box {
-    @apply bg-panel border-4 border-black;
-    box-shadow: 0 0 0 4px #a855f7, 8px 8px 0 4px #000;
+  .panel {
+    @apply bg-panel relative;
+    border: 3px solid #000;
+    box-shadow: inset 3px 3px 0 rgba(255,255,255,0.08), inset -3px -3px 0 rgba(0,0,0,0.45), 0 0 0 3px #2e3470, 6px 6px 0 3px #000;
   }
-  .pixel-btn {
-    @apply font-pixel text-xs sm:text-sm uppercase px-4 py-3 border-4 border-black bg-neon text-white
-      active:translate-x-1 active:translate-y-1 transition-transform select-none;
-    box-shadow: 4px 4px 0 #000;
+  .btn {
+    @apply font-pixel text-[11px] sm:text-xs uppercase tracking-wider px-4 py-3 text-white select-none relative
+      transition-[transform,filter] duration-75 hover:brightness-110 active:translate-y-[3px];
+    background: linear-gradient(180deg, #c084fc 0%, #a855f7 45%, #7e22ce 100%);
+    border: 3px solid #000;
+    box-shadow: inset 0 3px 0 rgba(255,255,255,0.35), inset 0 -4px 0 rgba(0,0,0,0.35), 0 4px 0 #000;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.6);
   }
-  .pixel-btn:active { box-shadow: 0 0 0 #000; }
-  .pixel-btn:focus-visible { outline: 3px solid #22d3ee; outline-offset: 2px; }
-  .pixel-btn-alt { @apply bg-cyanx text-navy; }
-  .pixel-btn-ghost { @apply bg-panel text-cyanx; }
-  .bar { @apply h-4 sm:h-5 border-4 border-black bg-black/60 overflow-hidden; }
-  .bar > div { @apply h-full transition-all duration-500 ease-[steps(10)]; }
-  .scanlines::after {
-    content: ''; pointer-events: none; position: absolute; inset: 0;
-    background: repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0 2px, transparent 2px 4px);
+  .btn:active { box-shadow: inset 0 3px 0 rgba(255,255,255,0.35), inset 0 -2px 0 rgba(0,0,0,0.35), 0 1px 0 #000; }
+  .btn:focus-visible { outline: 3px solid #fbbf24; outline-offset: 3px; }
+  .btn-cyan { @apply text-navy; background: linear-gradient(180deg, #67e8f9 0%, #22d3ee 45%, #0e7490 100%); text-shadow: none; }
+  .btn-gold { @apply text-navy; background: linear-gradient(180deg, #fde68a 0%, #fbbf24 45%, #b45309 100%); text-shadow: none; }
+  .btn-dark { @apply text-cyanx; background: linear-gradient(180deg, #2a3070 0%, #1c2150 60%, #141836 100%); }
+
+  .option {
+    @apply text-left w-full flex items-start gap-3 px-3 py-2.5 text-lg sm:text-xl leading-snug relative transition-transform duration-100;
+    background: linear-gradient(180deg, #1c2150, #141836);
+    border: 3px solid #000;
+    box-shadow: inset 2px 2px 0 rgba(255,255,255,0.07), 0 3px 0 #000;
   }
+  .option:not(:disabled):hover { @apply -translate-y-0.5; background: linear-gradient(180deg, #2b2f78, #1c2150); box-shadow: inset 2px 2px 0 rgba(255,255,255,0.1), 0 0 0 2px #a855f7, 0 5px 0 #000; }
+  .option:focus-visible { outline: 3px solid #fbbf24; outline-offset: 2px; }
+  .keycap {
+    @apply font-pixel text-[10px] shrink-0 w-7 h-7 flex items-center justify-center text-navy mt-0.5;
+    background: linear-gradient(180deg, #67e8f9, #0891b2);
+    border: 2px solid #000;
+    box-shadow: inset 0 2px 0 rgba(255,255,255,0.5), 0 2px 0 #000;
+  }
+
+  .segbar { @apply h-4 sm:h-5 relative overflow-hidden; border: 3px solid #000; background: #05060f; box-shadow: 0 0 0 2px #2e3470; }
+  .segbar > .fill { @apply h-full; transition: width 0.7s steps(10); }
+  .segbar::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(90deg, transparent 0 9%, rgba(0,0,0,0.55) 9% 10%); }
+  .segbar > .shine { position: absolute; inset: 0 0 55% 0; background: rgba(255,255,255,0.25); pointer-events: none; }
+
+  .crt::before { content: ''; pointer-events: none; position: absolute; inset: 0; z-index: 30; background: repeating-linear-gradient(0deg, rgba(0,0,0,0.18) 0 1px, transparent 1px 3px); }
+  .crt::after { content: ''; pointer-events: none; position: absolute; inset: 0; z-index: 31; background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.55) 100%); }
+
+  .text-glow { text-shadow: 0 0 10px currentColor, 3px 3px 0 #000; }
+  .text-outline { text-shadow: 3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; }
+
+  .bubble { @apply bg-white text-navy px-3 py-2 text-lg leading-tight relative; border: 3px solid #000; box-shadow: 4px 4px 0 #000; }
+  .bubble::after { content: ''; position: absolute; bottom: -9px; width: 12px; height: 12px; background: #fff; border-right: 3px solid #000; border-bottom: 3px solid #000; transform: rotate(45deg); }
+  .bubble-r::after { right: 28px; }
+  .bubble-l::after { left: 28px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation: none !important; transition: none !important; }
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition: none !important; }
 }

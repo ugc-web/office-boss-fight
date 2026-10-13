@@ -1,33 +1,29 @@
 'use client';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { BOSSES, GAME_OVER_MESSAGES } from '@/lib/bosses.mjs';
-import { initialState, answer, next, shuffle, getTitle } from '@/lib/game.mjs';
+import { BOSSES, GAME_OVER_MESSAGES, VICTORY_MESSAGES } from '@/lib/bosses.mjs';
+import { buildRounds, initialState, startRound, answer, next, getTitle, bossIndexOf } from '@/lib/game.mjs';
 import { track, getBest, saveBest } from '@/lib/analytics';
 import { play, getMuted, setMuted } from '@/lib/sound';
 import Landing from './Landing';
 import Battle from './Battle';
+import BossIntro from './BossIntro';
 import Results from './Results';
-
-const VICTORY_MESSAGES = {
-  'AI Overlord': 'Inbox zero. Deadlines crushed. Your manager wants to know your secret.',
-  'Corporate Survivor': 'You made it to 5 PM. Some bosses are still roaming the office.',
-  'Manual Labour Legend': 'You survived on pure grit. Imagine what you could do with AI.',
-};
+import { Cabinet } from './Extras';
 
 export default function Game() {
   const params = useSearchParams();
-  const challengeRaw = params.get('challenge');
-  const challenge = challengeRaw && /^\d{1,3}$/.test(challengeRaw) && +challengeRaw <= 100 ? challengeRaw : null;
+  const raw = params.get('challenge');
+  const challenge = raw && /^\d{1,3}$/.test(raw) && +raw <= 100 ? raw : null;
 
   const [screen, setScreen] = useState('landing');
-  const [state, setState] = useState(() => initialState(BOSSES.length));
-  const [options, setOptions] = useState([]); // shuffled options per boss
+  const [state, setState] = useState(null);
   const [runs, setRuns] = useState(0);
   const [best, setBest] = useState(null);
   const [newBest, setNewBest] = useState(false);
   const [muted, setMutedState] = useState(false);
   const [goMsg, setGoMsg] = useState(GAME_OVER_MESSAGES[0]);
+  const [locked, setLocked] = useState(false); // blocks double input during animations
 
   useEffect(() => {
     setBest(getBest());
@@ -36,27 +32,39 @@ export default function Game() {
   }, [challenge]);
 
   const start = () => {
-    play('click');
     track('game_start', { run: runs + 1, challenge: challenge ? +challenge : undefined });
     if (runs > 0) track('replay', { run: runs + 1 });
     setRuns((r) => r + 1);
-    setOptions(BOSSES.map((b) => shuffle(b.options)));
-    setState(initialState(BOSSES.length));
+    setState(initialState(buildRounds(BOSSES)));
     setNewBest(false);
     setScreen('game');
+    play('vs');
     window.scrollTo({ top: 0 });
   };
 
-  const onAnswer = (opt) => {
-    const boss = BOSSES[state.level];
-    const s = answer(state, boss.id, opt);
-    setState(s);
-    track('answer', { boss: boss.id, level: state.level + 1, correct: s.last.correct, option: opt.id });
-    play(s.last.correct ? 'hit' : 'hurt');
-    if (s.last.chai) setTimeout(() => play('heal'), 350);
+  const fight = () => {
+    play('select');
+    setState((s) => startRound(s));
   };
 
-  const onNext = () => {
+  const onAnswer = useCallback(
+    (opt) => {
+      if (locked || state?.phase !== 'playing') return;
+      setLocked(true);
+      setTimeout(() => setLocked(false), 450);
+      const { q, bossIndex } = state.rounds[state.round];
+      const s = answer(state, opt);
+      setState(s);
+      track('answer', { boss: BOSSES[bossIndex].id, question: q.id, kind: q.kind, round: state.round + 1, correct: s.last.correct });
+      play('arrow');
+      play(s.last.correct ? (s.last.ko ? 'ko' : 'hit') : 'hurt');
+      if (s.last.chai) setTimeout(() => play('heal'), 900);
+    },
+    [state, locked]
+  );
+
+  const onNext = useCallback(() => {
+    if (locked || state?.phase !== 'feedback') return;
     const s = next(state);
     setState(s);
     if (s.phase === 'victory' || s.phase === 'gameover') {
@@ -70,51 +78,45 @@ export default function Game() {
       play(victory ? 'win' : 'lose');
       setScreen('results');
     } else {
-      play('click');
+      play(s.phase === 'intro' ? 'vs' : 'click');
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  }, [state, locked]);
 
   const toggleMute = () => {
     setMuted(!muted);
     setMutedState(!muted);
   };
 
-  const boss = BOSSES[Math.min(state.level, BOSSES.length - 1)];
-  const bossOptions = useMemo(() => options[state.level] || boss.options, [options, state.level, boss]);
+  const boss = state ? BOSSES[bossIndexOf(state)] : null;
+  const inBattle = screen === 'game' && (state?.phase === 'playing' || state?.phase === 'feedback');
 
   return (
-    // Arcade cabinet frame on desktop, edge-to-edge compact on mobile
     <div className="w-full max-w-2xl">
-      <div className="sm:rounded-t-3xl sm:bg-gradient-to-b sm:from-neon sm:to-indigo-900 sm:p-3 sm:pb-0 sm:border-4 sm:border-black">
-        <div className="hidden sm:flex justify-center py-2 font-pixel text-xs text-white tracking-[0.3em]" aria-hidden>
-          ★ OFFICE BOSS FIGHT ★
-        </div>
-        <div className="relative bg-navy border-4 border-black p-4 sm:p-6 shadow-[inset_0_0_40px_rgba(34,211,238,0.15)]">
-          <button
-            onClick={toggleMute}
-            className="absolute top-2 right-2 text-xl z-10 bg-black/40 border-2 border-black px-2"
-            aria-label={muted ? 'Unmute sound' : 'Mute sound'}
-          >
-            {muted ? '🔇' : '🔊'}
-          </button>
+      <Cabinet>
+        <button
+          onClick={toggleMute}
+          className="absolute top-2 right-2 z-40 text-lg bg-black/60 border-2 border-black px-1.5 py-1 leading-none"
+          aria-label={muted ? 'Unmute sound' : 'Mute sound'}
+        >
+          {muted ? '🔇' : '🔊'}
+        </button>
 
-          {screen === 'landing' && <Landing onStart={start} best={best} challenge={challenge} />}
-          {screen === 'game' && (
-            <Battle boss={boss} options={bossOptions} state={state} onAnswer={onAnswer} onNext={onNext} />
-          )}
-          {screen === 'results' && (
-            <Results
-              state={state}
-              victory={state.phase === 'victory'}
-              message={state.phase === 'victory' ? VICTORY_MESSAGES[getTitle(state.score)] : goMsg}
-              newBest={newBest}
-              onReplay={start}
-            />
-          )}
-        </div>
-      </div>
-      <div className="hidden sm:block h-6 bg-indigo-900 border-4 border-t-0 border-black" aria-hidden />
+        {screen === 'landing' && <Landing onStart={start} best={best} challenge={challenge} />}
+        {screen === 'game' && state?.phase === 'intro' && (
+          <BossIntro key={bossIndexOf(state)} boss={boss} index={bossIndexOf(state)} total={BOSSES.length} onFight={fight} />
+        )}
+        {inBattle && <Battle boss={boss} state={state} onAnswer={onAnswer} onNext={onNext} />}
+        {screen === 'results' && (
+          <Results
+            state={state}
+            victory={state.phase === 'victory'}
+            newBest={newBest}
+            onReplay={start}
+            message={state.phase === 'victory' ? VICTORY_MESSAGES[getTitle(state.score)] : goMsg}
+          />
+        )}
+      </Cabinet>
     </div>
   );
 }

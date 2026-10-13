@@ -1,67 +1,75 @@
 import { BOSSES } from '@/lib/bosses.mjs';
+import Sprite from './Sprite';
+import { Typewriter } from './ui';
 
 export default function Landing({ onStart, best, challenge }) {
   return (
-    <div className="text-center space-y-6">
-      <p className="font-pixel text-[10px] sm:text-xs text-cyanx tracking-widest">OFFICE BOSS FIGHT</p>
-      <h1 className="font-pixel text-xl sm:text-3xl leading-relaxed text-white">
-        Your Office Has Bosses.
-        <br />
-        <span className="text-neon">Do You Have AI?</span>
-      </h1>
-      <p className="text-2xl text-gray-300">
-        Five workplace nightmares. Five boss fights. Use AI to survive the workday.
-      </p>
+    <div className="text-center space-y-5 sm:space-y-6 py-2">
+      <div className="space-y-3">
+        <p className="font-pixel text-[9px] sm:text-[10px] text-gold tracking-[0.3em] animate-blink">INSERT COIN · PRESS START</p>
+        <h1 className="font-pixel leading-tight">
+          <span className="block text-3xl sm:text-5xl text-white text-outline">OFFICE</span>
+          <span className="block text-3xl sm:text-5xl text-neon text-glow">BOSS FIGHT</span>
+        </h1>
+        <p className="font-pixel text-[10px] sm:text-xs text-cyanx leading-relaxed">
+          Your Office Has Bosses. Do You Have AI?
+        </p>
+      </div>
 
       {challenge && (
-        <div className="pixel-box p-3 text-bad font-pixel text-[10px] sm:text-xs leading-relaxed animate-pop">
-          ⚔️ A colleague scored {challenge}/100. Think you can beat them?
+        <div className="panel p-3 animate-pop">
+          <p className="font-pixel text-[10px] sm:text-xs text-bad leading-relaxed">⚔️ CHALLENGE RECEIVED</p>
+          <p className="text-xl">A colleague scored <b className="text-gold">{challenge}/100</b>. Think you can beat them?</p>
         </div>
       )}
 
-      <div className="flex justify-center gap-3 text-4xl sm:text-5xl" aria-hidden>
-        {BOSSES.map((b, i) => (
-          <span key={b.id} className="animate-bob" style={{ animationDelay: `${i * 0.15}s` }}>
-            {b.sprite}
-          </span>
-        ))}
+      {/* Hero vs bosses lineup */}
+      <div className="panel p-4 overflow-hidden">
+        <div className="flex flex-col sm:flex-row items-center sm:items-end justify-between gap-3 sm:gap-2">
+          <div className="flex flex-col items-center shrink-0">
+            <div className="bubble bubble-l text-base mb-3 max-w-[10rem]">
+              <Typewriter text="I have a prompt for that." />
+            </div>
+            <Sprite name="hero" size={64} className="animate-bob" title="The Intern, Prompt Archer" />
+            <p className="font-pixel text-[8px] text-cyanx mt-2">THE INTERN</p>
+          </div>
+          <span className="font-pixel text-2xl sm:text-3xl text-gold text-glow animate-vs self-center">VS</span>
+          <div className="grid grid-cols-5 gap-1 sm:gap-2 items-end">
+            {BOSSES.map((b, i) => (
+              <div key={b.id} className="flex flex-col items-center" style={{ animationDelay: `${i * 0.1}s` }}>
+                <Sprite name={b.sprite} size={i === 4 ? 56 : 40} className="animate-breathe" style={{ animationDelay: `${i * 0.25}s`, filter: `drop-shadow(0 0 6px ${b.color})` }} title={b.name} />
+              </div>
+            ))}
+          </div>
+        </div>
+        <p className="text-lg sm:text-xl text-gray-300 mt-4">
+          Five workplace nightmares. Ten questions. Fire <span className="text-cyanx">prompt arrows</span> by picking the right AI move, and learn which AI tool does what along the way.
+        </p>
       </div>
 
-      <ul className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-lg sm:text-xl">
+      <ul className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-lg">
         {[
-          ['❤️', '100 HP to start'],
-          ['👾', '5 office bosses'],
-          ['☕', 'Chai Break healing'],
-          ['⏱️', '2–4 minutes'],
-          ['🏆', 'Share your score'],
-        ].map(([icon, t]) => (
-          <li key={t} className="bg-black/40 border-2 border-black p-2">
+          ['❤️', '100 HP', 'Wrong = −20'],
+          ['🏹', '2 hits per boss', 'Workflow + AI tool'],
+          ['☕', 'Chai Break', '3 in a row = +10 HP'],
+          ['⏱️', '3 minutes', 'Share your title'],
+        ].map(([icon, a, b]) => (
+          <li key={a} className="panel p-2">
             <div className="text-2xl">{icon}</div>
-            {t}
+            <div className="font-pixel text-[9px] text-white mt-1">{a}</div>
+            <div className="text-base text-gray-400">{b}</div>
           </li>
         ))}
       </ul>
 
-      <details className="text-left text-lg bg-black/30 border-2 border-black p-3">
-        <summary className="font-pixel text-[10px] sm:text-xs cursor-pointer text-cyanx">HOW TO PLAY</summary>
-        <ul className="mt-2 space-y-1 list-disc pl-5">
-          <li>Each boss brings a workplace problem. Pick the best AI-powered answer.</li>
-          <li>Correct: the boss is defeated and you get +20 points.</li>
-          <li>Wrong: you lose 20 HP and get roasted. You only get one try per boss.</li>
-          <li>3 correct answers in a row: Chai Break, +10 HP.</li>
-          <li>Reach 0 HP and you’re fired. Beat all 5 bosses and you win.</li>
-        </ul>
-      </details>
-
-      <button className="pixel-btn text-sm sm:text-base px-8 py-4 animate-pulse" onClick={onStart} autoFocus>
+      <button className="btn btn-gold text-sm sm:text-base px-10 py-4 animate-glow" onClick={onStart} autoFocus>
         ▶ Start Boss Fight
       </button>
 
-      {best && (
-        <p className="font-pixel text-[10px] text-gray-400">
-          YOUR BEST: {best.score}/100 · {best.title}
-        </p>
-      )}
+      <p className="font-pixel text-[8px] text-gray-500 leading-relaxed">
+        KEYS: 1–4 OR A–D TO ANSWER · ENTER TO CONTINUE
+        {best && <><br /><span className="text-gold">HIGH SCORE: {best.score}/100 · {best.title.toUpperCase()}</span></>}
+      </p>
     </div>
   );
 }

@@ -12,7 +12,7 @@ export const metadata = {
   description: 'Fight office villains using the right AI tools. Survive the workday. Become the AI Overlord.',
   openGraph: {
     title: 'Office Boss Fight',
-    description: 'Your Office Has Bosses. Do You Have AI? Five boss fights, 2–4 minutes.',
+    description: 'Fire prompt arrows at the Inbox Hydra, Excel Monster & Deadline Dragon. Learn which AI tool does what.',
     type: 'website',
   },
   twitter: { card: 'summary', title: 'Office Boss Fight', description: 'Become the AI Overlord.' },
