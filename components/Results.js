@@ -3,8 +3,8 @@ import { useState } from 'react';
 import { getTitle, roundsFaced } from '@/lib/game.mjs';
 import { TAGLINES } from '@/lib/bosses.mjs';
 import { track } from '@/lib/analytics';
-import Sprite from './Sprite';
-import { Confetti } from './ui';
+import Mob from './Mob';
+import { Confetti, Hearts } from './ui';
 import { StudyNotes, Toolkit } from './Extras';
 
 const baseUrl = () => (typeof window !== 'undefined' ? `${window.location.origin}${window.location.pathname}` : '');
@@ -50,54 +50,54 @@ export default function Results({ state, victory, message, newBest, onReplay }) 
   };
 
   return (
-    <div className="space-y-5 relative">
+    <div className="relative z-10 space-y-5 max-w-3xl mx-auto py-2">
       {victory && <Confetti />}
       <div className="text-center space-y-2">
-        <h2 className={`font-pixel text-2xl sm:text-4xl text-glow animate-vs ${victory ? 'text-gold' : 'text-red-500'}`}>
-          {victory ? 'YOU WIN!' : 'GAME OVER'}
+        <h2 className={`font-title text-4xl sm:text-6xl animate-vs ${victory ? 'text-mcyellow' : 'text-[#ff5555]'}`} style={{ textShadow: victory ? '4px 4px 0 #3f3f00' : '4px 4px 0 #3f0000' }}>
+          {victory ? 'You win!' : 'You died!'}
         </h2>
-        <p className="text-xl sm:text-2xl text-gray-300 italic">“{message}”</p>
+        <p className="font-pixel text-base sm:text-xl text-white mc-text-dark max-w-xl mx-auto">“{message}”</p>
+        {!victory && <p className="font-pixel text-sm sm:text-base text-white/80 mc-text-dark">Score: <span className="text-mcyellow">{score}</span></p>}
       </div>
 
-      <div className="panel p-5 mx-auto max-w-md overflow-hidden" style={{ boxShadow: '0 0 0 3px #a855f7, 0 0 40px rgba(168,85,247,.45), 6px 6px 0 3px #000' }}>
-        {newBest && <span className="absolute top-3 -right-8 rotate-45 bg-gold text-navy font-pixel text-[8px] px-8 py-1 border-y-2 border-black">NEW BEST</span>}
-        <p className="font-pixel text-[9px] text-cyanx tracking-[0.3em] text-center">🏹 OFFICE BOSS FIGHT</p>
-        <div className="flex items-center gap-4 mt-4">
-          <Sprite name="hero" size={64} className={victory ? 'animate-bob' : 'grayscale opacity-60 rotate-90'} />
-          <div>
-            <p className="text-base text-gray-400">Rank earned</p>
-            <p className="font-pixel text-base sm:text-xl text-neon text-glow leading-relaxed">{title.toUpperCase()}</p>
+      <div className="mc-panel p-4 sm:p-5 mx-auto max-w-md overflow-hidden">
+        {newBest && <span className="absolute top-3 -right-9 rotate-45 bg-mcyellow text-black font-pixel text-xs px-9 py-0.5 border-y-2 border-black">NEW BEST</span>}
+        <p className="font-title text-sm text-[#3f3f3f] tracking-widest text-center">🏹 Office Boss Fight</p>
+        <div className="flex items-center gap-4 mt-3">
+          <div className="mc-slot p-2 shrink-0"><Mob name="hero" height={72} pose={victory ? 'cheer' : 'ko'} /></div>
+          <div className="min-w-0">
+            <p className="font-pixel text-sm text-[#555]">Rank earned</p>
+            <p className="font-title text-xl sm:text-2xl leading-tight text-[#5b2a86]">{title}</p>
+            <div className="mt-1"><Hearts hp={hp} size={13} /></div>
           </div>
         </div>
         <div className="grid grid-cols-3 gap-2 mt-4 text-center">
           {[
-            ['SCORE', score, '/100', 'text-gold'],
-            ['BOSSES', defeated, '/5', 'text-cyanx'],
-            ['HP LEFT', hp, '', hp ? 'text-good' : 'text-red-500'],
-          ].map(([l, v, s, c]) => (
-            <div key={l} className="bg-black/40 border-2 border-black p-2">
-              <p className="font-pixel text-[8px] text-gray-400">{l}</p>
-              <p className={`font-pixel text-lg sm:text-xl mt-1 ${c}`}>{v}<span className="text-[9px] text-gray-500">{s}</span></p>
+            ['Score', score, '/100'],
+            ['Bosses', defeated, '/5'],
+            ['Accuracy', accuracy, '%'],
+          ].map(([l, v, s]) => (
+            <div key={l} className="mc-slot p-2">
+              <p className="font-pixel text-xs text-white mc-text">{l}</p>
+              <p className="font-title text-xl sm:text-2xl text-mcyellow mc-text-dark">{v}<span className="text-xs text-white">{s}</span></p>
             </div>
           ))}
         </div>
-        <div className="flex justify-between text-lg text-gray-300 mt-3">
-          <span>🎯 Accuracy {accuracy}%</span>
-          <span>🔥 Best streak {bestStreak}</span>
-        </div>
-        <p className="text-xl text-good text-center mt-3">“{TAGLINES[title]}”</p>
-        <p className="text-sm text-gray-500 text-center break-all">{baseUrl().replace(/^https?:\/\//, '')}</p>
+        <p className="font-pixel text-base text-[#2b2b2b] text-center mt-3">🔥 Best streak {bestStreak} · “{TAGLINES[title]}”</p>
+        <p className="font-pixel text-xs text-[#555] text-center break-all mt-1">{baseUrl().replace(/^https?:\/\//, '')}</p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3 max-w-xl mx-auto">
-        <button className="btn" onClick={onShare}>📤 Share {victory ? 'Result' : 'Score'}</button>
-        <button className="btn btn-cyan" onClick={onChallenge}>⚔️ Challenge</button>
-        <button className="btn btn-gold" onClick={onReplay}>🔁 {victory ? 'Play Again' : 'Retry'}</button>
+      <div className="grid gap-2.5 sm:grid-cols-3 max-w-xl mx-auto">
+        <button className="mc-btn mc-btn-green" onClick={onReplay}>{victory ? '🔁 Play again' : '☠ Respawn'}</button>
+        <button className="mc-btn" onClick={onShare}>📤 Share</button>
+        <button className="mc-btn" onClick={onChallenge}>⚔ Challenge</button>
       </div>
-      <p className="font-pixel text-[10px] text-good h-4 text-center" aria-live="polite">{toast}</p>
+      <p className="font-pixel text-sm text-mcgreen h-4 text-center mc-text-dark" aria-live="polite">{toast}</p>
 
-      <StudyNotes missed={missed} open={!victory} />
-      <Toolkit />
+      <div className="grid gap-3 lg:grid-cols-2 lg:items-start">
+        <StudyNotes missed={missed} open={!victory} />
+        <Toolkit />
+      </div>
     </div>
   );
 }

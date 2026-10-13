@@ -2,3 +2,7 @@ node_modules
 .next
 out
 .vercel
+
+# local env files and macOS junk
+.env*.local
+.DS_Store

@@ -1,74 +1,68 @@
+'use client';
 import { BOSSES } from '@/lib/bosses.mjs';
-import Sprite from './Sprite';
+import Mob from './Mob';
 import { Typewriter } from './ui';
 
+/** Minecraft-style title screen. */
 export default function Landing({ onStart, best, challenge }) {
   return (
-    <div className="text-center space-y-5 sm:space-y-6 py-2">
-      <div className="space-y-3">
-        <p className="font-pixel text-[9px] sm:text-[10px] text-gold tracking-[0.3em] animate-blink">INSERT COIN · PRESS START</p>
-        <h1 className="font-pixel leading-tight">
-          <span className="block text-3xl sm:text-5xl text-white text-outline">OFFICE</span>
-          <span className="block text-3xl sm:text-5xl text-neon text-glow">BOSS FIGHT</span>
+    <div className="relative z-10 flex flex-col items-center text-center gap-5 sm:gap-6 py-4 sm:py-8">
+      <div className="relative">
+        <h1 className="font-title leading-[0.9]">
+          <span className="block text-[2.6rem] sm:text-7xl lg:text-8xl mc-title">OFFICE</span>
+          <span className="block text-[2.6rem] sm:text-7xl lg:text-8xl mc-title" style={{ color: '#7ee15a', textShadow: '3px 3px 0 #2d5a1b, 6px 6px 0 #000' }}>BOSS FIGHT</span>
         </h1>
-        <p className="font-pixel text-[10px] sm:text-xs text-cyanx leading-relaxed">
-          Your Office Has Bosses. Do You Have AI?
-        </p>
+        <span className="mc-splash absolute -right-1 -bottom-5 sm:-right-20 sm:-bottom-6 font-pixel text-sm sm:text-xl whitespace-nowrap">No tech skills needed!</span>
       </div>
+      <p className="font-pixel text-base sm:text-xl text-white mc-text-dark max-w-xl mt-3">Your office has bosses. Do you have AI?</p>
 
       {challenge && (
-        <div className="panel p-3 animate-pop">
-          <p className="font-pixel text-[10px] sm:text-xs text-bad leading-relaxed">⚔️ CHALLENGE RECEIVED</p>
-          <p className="text-xl">A colleague scored <b className="text-gold">{challenge}/100</b>. Think you can beat them?</p>
+        <div className="mc-dark px-4 py-3 animate-pop max-w-md">
+          <p className="font-pixel text-sm sm:text-base text-mcred">⚔ Challenge received</p>
+          <p className="font-pixel text-base sm:text-lg text-white">A colleague scored <b className="text-mcyellow">{challenge}/100</b>. Think you can beat them?</p>
         </div>
       )}
 
-      {/* Hero vs bosses lineup */}
-      <div className="panel p-4 overflow-hidden">
-        <div className="flex flex-col sm:flex-row items-center sm:items-end justify-between gap-3 sm:gap-2">
-          <div className="flex flex-col items-center shrink-0">
-            <div className="bubble bubble-l text-base mb-3 max-w-[10rem]">
-              <Typewriter text="AI can help with that!" />
-            </div>
-            <Sprite name="hero" size={64} className="animate-bob" title="The Intern, AI Archer" />
-            <p className="font-pixel text-[8px] text-cyanx mt-2">THE INTERN</p>
-          </div>
-          <span className="font-pixel text-2xl sm:text-3xl text-gold text-glow animate-vs self-center">VS</span>
-          <div className="grid grid-cols-5 gap-1 sm:gap-2 items-end">
-            {BOSSES.map((b, i) => (
-              <div key={b.id} className="flex flex-col items-center" style={{ animationDelay: `${i * 0.1}s` }}>
-                <Sprite name={b.sprite} size={i === 4 ? 56 : 40} className="animate-breathe" style={{ animationDelay: `${i * 0.25}s`, filter: `drop-shadow(0 0 6px ${b.color})` }} title={b.name} />
-              </div>
-            ))}
-          </div>
+      <div className="flex flex-col gap-2.5 w-full max-w-sm sm:max-w-md">
+        <button className="mc-btn mc-btn-green text-lg sm:text-xl py-3" onClick={onStart} autoFocus>▶ Start Boss Fight</button>
+        <div className="mc-dark p-3 text-left">
+          <p className="font-pixel text-sm sm:text-base text-white leading-snug">
+            Fight <span className="text-mcaqua">5 office bosses</span> in 10 rounds. Case studies, spot-the-mistake, brain teasers and myths. Pick the smartest answer to fire your arrow. Careful: the obvious answer is often a trap.
+          </p>
         </div>
-        <p className="text-lg sm:text-xl text-gray-300 mt-4">
-          Five office nightmares. Ten easy questions. Fire <span className="text-cyanx">AI arrows</span> by picking the smartest way to use AI. No tech skills needed.
-        </p>
+        <ul className="grid grid-cols-2 gap-2 font-pixel text-sm text-white text-left">
+          {[
+            ['❤', '10 hearts', 'Wrong = −2 ♥'],
+            ['⏱', '30 sec / question', 'Too slow = hit'],
+            ['☕', 'Chai Break', '3 in a row = +1 ♥'],
+            ['🏹', '2 hits per boss', 'Miss one, it escapes'],
+          ].map(([icon, a, b]) => (
+            <li key={a} className="mc-dark px-2.5 py-2 flex gap-2 items-start">
+              <span className="text-xl leading-none text-mcred">{icon}</span>
+              <span><span className="block text-mcyellow leading-tight">{a}</span><span className="text-mcgray text-[13px]">{b}</span></span>
+            </li>
+          ))}
+        </ul>
       </div>
 
-      <ul className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-lg">
-        {[
-          ['❤️', '100 HP', 'Wrong = −20'],
-          ['🏹', '2 hits per boss', 'Work problem + AI basics'],
-          ['☕', 'Chai Break', '3 in a row = +10 HP'],
-          ['⏱️', '3 minutes', 'Share your title'],
-        ].map(([icon, a, b]) => (
-          <li key={a} className="panel p-2">
-            <div className="text-2xl">{icon}</div>
-            <div className="font-pixel text-[9px] text-white mt-1">{a}</div>
-            <div className="text-base text-gray-400">{b}</div>
-          </li>
-        ))}
-      </ul>
+      {/* Hero + bosses hanging out on the grass */}
+      <div className="relative w-full max-w-3xl h-36 sm:h-44 mt-1">
+        <div className="absolute bottom-0 left-[4%] sm:left-[8%] flex flex-col items-center">
+          <div className="mc-bubble tail-l mb-2 text-sm sm:text-base whitespace-nowrap"><Typewriter text="AI can help with that!" /></div>
+          <Mob name="hero" height={84} pose="idle" />
+        </div>
+        <div className="absolute bottom-0 right-[2%] sm:right-[6%] flex items-end gap-1.5 sm:gap-4">
+          {BOSSES.map((b, i) => (
+            <div key={b.id} className="hidden first:block [&:nth-child(-n+3)]:block sm:block" style={{ filter: `drop-shadow(0 0 6px ${b.color})` }}>
+              <Mob name={b.sprite} height={b.final ? 84 : 58} pose="idle" style={{ animationDelay: `${-i * 0.4}s` }} title={b.name} />
+            </div>
+          ))}
+        </div>
+      </div>
 
-      <button className="btn btn-gold text-sm sm:text-base px-10 py-4 animate-glow" onClick={onStart} autoFocus>
-        ▶ Start Boss Fight
-      </button>
-
-      <p className="font-pixel text-[8px] text-gray-500 leading-relaxed">
-        KEYS: 1–4 OR A–D TO ANSWER · ENTER TO CONTINUE
-        {best && <><br /><span className="text-gold">HIGH SCORE: {best.score}/100 · {best.title.toUpperCase()}</span></>}
+      <p className="font-pixel text-xs sm:text-sm text-white/80 mc-text-dark">
+        Keys: 1–4 or A–D to answer · the game moves on by itself
+        {best && <><br /><span className="text-mcyellow">High score: {best.score}/100 · {best.title}</span></>}
       </p>
     </div>
   );

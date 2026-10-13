@@ -1,17 +1,19 @@
-import { TOOLKIT, GOLDEN_RULES, findQuestion } from '@/lib/bosses.mjs';
+import { TOOLKIT, GOLDEN_RULES, QUESTION_TYPES, findQuestion } from '@/lib/bosses.mjs';
+import World from './World';
+import { tex } from '@/lib/textures';
 
 export function StudyNotes({ missed, open }) {
-  const items = missed.map(findQuestion).filter(Boolean);
+  const items = [...new Set(missed)].map(findQuestion).filter(Boolean);
   if (!items.length) return null;
   return (
-    <details className="panel p-3" open={open}>
-      <summary className="font-pixel text-[10px] text-bad cursor-pointer">📝 STUDY NOTES: {items.length} MISSED</summary>
+    <details className="mc-dark p-3" open={open}>
+      <summary className="font-pixel text-base text-mcred cursor-pointer">📖 Study notes: {items.length} missed</summary>
       <ul className="mt-3 space-y-3">
         {items.map(({ boss, q }) => (
-          <li key={q.id} className="text-lg border-l-4 pl-3" style={{ borderColor: boss.color }}>
-            <p className="text-gray-400 text-base">{boss.name} · {q.kind === 'tool' ? 'AI basics' : 'Work problem'}</p>
+          <li key={q.id} className="font-pixel text-base border-l-4 pl-3 leading-snug" style={{ borderColor: boss.color }}>
+            <p className="text-mcgray text-sm">{boss.name} · {QUESTION_TYPES[q.type]?.icon} {QUESTION_TYPES[q.type]?.label}</p>
             <p className="text-white">{q.scenario}</p>
-            <p className="text-good">✔ {q.options.find((o) => o.correct).text}</p>
+            <p className="text-mcgreen">✔ {q.options.find((o) => o.correct).text}</p>
           </li>
         ))}
       </ul>
@@ -21,61 +23,44 @@ export function StudyNotes({ missed, open }) {
 
 export function Toolkit() {
   return (
-    <details className="panel p-3" open>
-      <summary className="font-pixel text-[10px] text-cyanx cursor-pointer">🤖 WHAT AI CAN DO FOR YOU</summary>
-      <div className="mt-3 border-[3px] border-black bg-gold/10 p-3" style={{ boxShadow: '0 0 0 2px #fbbf24' }}>
-        <p className="font-pixel text-[9px] text-gold mb-2">⭐ 3 GOLDEN RULES</p>
-        <ol className="space-y-1 text-lg leading-tight list-decimal pl-5">
+    <details className="mc-dark p-3" open>
+      <summary className="font-pixel text-base text-mcaqua cursor-pointer">🤖 What AI can do for you</summary>
+      <div className="mt-3 mc-panel p-3">
+        <p className="font-title text-sm text-[#5b2a86] mb-1">⭐ 4 golden rules</p>
+        <ol className="font-pixel space-y-1 text-base leading-snug list-decimal pl-5 text-[#2b2b2b]">
           {GOLDEN_RULES.map((r) => <li key={r}>{r}</li>)}
         </ol>
       </div>
       <ul className="mt-3 grid sm:grid-cols-2 gap-2">
         {TOOLKIT.map((t) => (
-          <li key={t.job} className="bg-black/30 border-2 border-black p-2 text-lg leading-tight">
+          <li key={t.job} className="bg-black/40 border-2 border-black p-2 font-pixel text-base leading-tight">
             <span className="mr-1">{t.icon}</span>
             <b className="text-white">{t.job}</b>
             <br />
-            <span className="text-gray-400 text-base">{t.tools}</span>
+            <span className="text-mcgray text-sm">{t.tools}</span>
           </li>
         ))}
       </ul>
-      <p className="text-base text-gray-400 mt-2">
+      <p className="font-pixel text-sm text-mcgray mt-2">
         Popular free AI assistants include ChatGPT, Google Gemini and Microsoft Copilot. At work, use the one your company has approved.
       </p>
     </details>
   );
 }
 
-export function Cabinet({ children }) {
+/** Full-screen frame. The title and results screens sit on a living Minecraft world; battles get a dark dirt backdrop. */
+export function Screen({ biome, dim = false, children }) {
   return (
-    <div
-      className="relative sm:p-4 sm:pb-6 sm:rounded-t-[2rem] sm:border-[3px] sm:border-black sm:animate-glow"
-      style={{ background: 'linear-gradient(180deg, #4c1d95 0%, #2e1065 40%, #1e1b4b 100%)' }}
-    >
-      <div className="hidden sm:block mb-3 border-[3px] border-black bg-black overflow-hidden" style={{ boxShadow: 'inset 0 0 20px rgba(251,191,36,.35)' }}>
-        <div className="flex w-max whitespace-nowrap animate-marquee py-1.5 font-pixel text-[10px] text-gold">
-          {[0, 1].map((k) => (
-            <span key={k} className="px-4">
-              ★ OFFICE BOSS FIGHT ★ DEFEAT THE INBOX HYDRA ★ OUTSMART THE EXCEL MONSTER ★ BANISH THE MEETING DEMON ★ EXORCISE THE PPT PHANTOM ★ SLAY THE DEADLINE DRAGON
-            </span>
-          ))}
-        </div>
+    <div className="relative min-h-[100dvh] w-full">
+      <div className="fixed inset-0">
+        {dim ? (
+          // Plain dark stone "dirt menu" backdrop, so the battle stays the focus.
+          <div className="absolute inset-0" style={tex('deepslate', 64, { filter: 'brightness(.55)' })} />
+        ) : (
+          <World biome={biome} block={56} />
+        )}
       </div>
-      <div
-        className="relative bg-navy sm:border-[6px] sm:border-black sm:rounded-lg p-3 sm:p-5 min-h-[100dvh] sm:min-h-0"
-        style={{ boxShadow: 'inset 0 0 60px rgba(34,211,238,0.12)' }}
-      >
-        {children}
-      </div>
-      <div className="hidden sm:flex items-center justify-center gap-6 mt-4" aria-hidden>
-        <div className="w-10 h-10 rounded-full bg-black border-[3px] border-black relative">
-          <div className="absolute -top-5 left-1/2 -translate-x-1/2 w-3 h-7 bg-gray-700 border-2 border-black" />
-          <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-red-500 border-[3px] border-black" />
-        </div>
-        {['#22d3ee', '#a855f7', '#4ade80', '#fbbf24'].map((c) => (
-          <div key={c} className="w-7 h-7 rounded-full border-[3px] border-black" style={{ background: c, boxShadow: 'inset 0 -3px 0 rgba(0,0,0,.35)' }} />
-        ))}
-      </div>
+      <div className="relative mx-auto w-full max-w-6xl px-3 sm:px-6 lg:px-10 pt-3 sm:pt-6 pb-8">{children}</div>
     </div>
   );
 }

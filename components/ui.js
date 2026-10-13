@@ -2,18 +2,50 @@
 import { useEffect, useState } from 'react';
 import { play } from '@/lib/sound';
 
-export function SegBar({ value, max = 100, color, label, right, align = 'left' }) {
-  const pct = Math.max(0, Math.min(100, (value / max) * 100));
-  const fill = pct > 50 ? color : pct > 25 ? '#fbbf24' : '#ef4444';
+/** Minecraft heart: full, half or empty, drawn as a 9x9 pixel grid. */
+const HEART = ['.kk...kk.', 'kRRk.kRRk', 'kRWRkRRRk', 'kRRRRRRRk', 'kRRRRRRRk', '.kRRRRRk.', '..kRRRk..', '...kRk...', '....k....'];
+export function Heart({ fill = 1, size = 18, poison = false }) {
+  const red = poison ? '#7a9b2f' : '#e81d1d';
   return (
-    <div className="w-full">
-      <div className={`flex items-baseline gap-2 font-pixel text-[8px] sm:text-[10px] mb-1 text-outline ${align === 'right' ? 'flex-row-reverse' : ''}`}>
-        <span className="truncate">{label}</span>
-        <span className="text-gold shrink-0">{right ?? value}</span>
-      </div>
-      <div className="segbar" role="progressbar" aria-label={label} aria-valuenow={value} aria-valuemax={max}>
-        <div className={`fill ${align === 'right' ? 'ml-auto' : ''}`} style={{ width: `${pct}%`, background: `linear-gradient(180deg, ${fill}, ${fill}cc)` }} />
-        <div className="shine" />
+    <svg viewBox="0 0 9 9" width={size} height={size} style={{ shapeRendering: 'crispEdges' }} aria-hidden>
+      {HEART.flatMap((row, y) =>
+        [...row].map((c, x) => {
+          if (c === '.') return null;
+          let col = c === 'k' ? '#1a0000' : '#3a1a1a';
+          const filled = fill >= 1 || (fill > 0 && x <= 4);
+          if (c !== 'k' && filled) col = c === 'W' ? '#ffc6c6' : red;
+          return <rect key={`${x}${y}`} x={x} y={y} width="1" height="1" fill={col} />;
+        })
+      )}
+    </svg>
+  );
+}
+
+/** 10 hearts = 100 HP. Hearts jiggle when health is low, like in Minecraft. */
+export function Hearts({ hp, max = 100, size = 18, label = 'Health' }) {
+  const per = max / 10;
+  const low = hp <= max * 0.3;
+  return (
+    <div className="flex gap-[1px]" role="meter" aria-label={label} aria-valuenow={hp} aria-valuemax={max}>
+      {Array.from({ length: 10 }).map((_, i) => {
+        const f = Math.max(0, Math.min(1, (hp - i * per) / per));
+        return (
+          <span key={i} className={low && hp > 0 ? 'animate-heartJiggle' : ''} style={{ animationDelay: `${(i * 37) % 200}ms` }}>
+            <Heart fill={f >= 1 ? 1 : f >= 0.5 ? 0.5 : 0} size={size} />
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Wither/Ender-dragon style boss bar. */
+export function BossBar({ name, value, max = 100, color }) {
+  return (
+    <div className="w-full text-center">
+      <p className="font-pixel text-sm sm:text-base text-white mc-text-dark leading-none mb-1 truncate">{name}</p>
+      <div className="mc-bossbar" role="meter" aria-label={`${name} health`} aria-valuenow={value} aria-valuemax={max}>
+        <i style={{ width: `${(value / max) * 100}%`, background: color }} />
       </div>
     </div>
   );
@@ -41,57 +73,39 @@ export function Typewriter({ text, speed = 22, sound = false, className = '' }) 
   );
 }
 
-/** Pixel office background: skyline window, posters, floor tiles. */
-export function OfficeBackdrop({ tint = '#a855f7', danger = false }) {
+/** Burst of square particles (crit sparks, smoke puffs, XP orbs). */
+export function Particles({ count = 12, colors = ['#fff'], size = 6, spread = 70, className = '', style, delay = 0 }) {
   return (
-    <div className="absolute inset-0 overflow-hidden" aria-hidden>
-      {/* wall */}
-      <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, #1a1d45 0%, #232766 62%, transparent 62%)` }} />
-      {/* window with skyline */}
-      <div className="absolute left-1/2 -translate-x-1/2 top-[8%] w-[46%] h-[38%] border-[3px] border-black" style={{ background: danger ? 'linear-gradient(180deg,#7f1d1d,#f97316)' : 'linear-gradient(180deg,#312e81,#7c3aed 70%,#f472b6)' }}>
-        <div className="absolute bottom-0 inset-x-0 h-[55%] flex items-end gap-[3%] px-[3%]">
-          {[60, 85, 45, 95, 70, 50, 80, 65].map((h, i) => (
-            <div key={i} className="flex-1 bg-[#0b0b24] relative" style={{ height: `${h}%` }}>
-              <div className="absolute inset-1 opacity-70" style={{ background: 'repeating-linear-gradient(0deg, transparent 0 5px, #fde04755 5px 7px)' }} />
-            </div>
-          ))}
-        </div>
-        <div className="absolute inset-y-0 left-1/2 w-[3px] bg-black" />
-        <div className="absolute inset-x-0 top-1/2 h-[3px] bg-black" />
-      </div>
-      {/* poster + clock */}
-      <div className="absolute left-[5%] top-[12%] w-[13%] aspect-[3/4] border-[3px] border-black bg-[#fde047] hidden sm:flex flex-col items-center justify-center rotate-[-4deg]">
-        <span className="font-pixel text-[6px] text-navy text-center leading-tight">HANG IN<br />THERE</span>
-        <span className="text-sm">🐱</span>
-      </div>
-      <div className="absolute right-[6%] top-[12%] w-9 h-9 rounded-full border-[3px] border-black bg-white flex items-center justify-center">
-        <span className="font-pixel text-[6px] text-red-600">4:59</span>
-      </div>
-      {/* floor */}
-      <div className="absolute inset-x-0 bottom-0 h-[38%]" style={{ background: 'repeating-linear-gradient(90deg, #2a1f3d 0 32px, #231a35 32px 64px)' }}>
-        <div className="absolute inset-x-0 top-0 h-[4px] bg-black/60" />
-      </div>
-      {/* desk + plant */}
-      <div className="absolute left-[3%] bottom-[8%] text-2xl sm:text-3xl">🪴</div>
-      <div className="absolute right-[3%] bottom-[8%] text-2xl sm:text-3xl">🗄️</div>
-      <div className="absolute inset-0 mix-blend-overlay opacity-40" style={{ background: `radial-gradient(ellipse at 70% 60%, ${tint}, transparent 60%)` }} />
+    <div className={`absolute pointer-events-none ${className}`} style={style} aria-hidden>
+      {Array.from({ length: count }).map((_, i) => {
+        const a = (i / count) * Math.PI * 2 + (i % 3) * 0.4;
+        const r = spread * (0.5 + ((i * 7) % 5) / 8);
+        return (
+          <span
+            key={i}
+            className="absolute block animate-particle opacity-0"
+            style={{
+              width: size, height: size, background: colors[i % colors.length],
+              '--dx': `${Math.cos(a) * r}px`, '--dy': `${Math.sin(a) * r - 20}px`,
+              animationDelay: `${delay + (i % 4) * 0.03}s`,
+              boxShadow: 'inset -1px -1px 0 rgba(0,0,0,.3)',
+            }}
+          />
+        );
+      })}
     </div>
   );
 }
 
-export function Confetti({ count = 40 }) {
-  const colors = ['#a855f7', '#22d3ee', '#4ade80', '#fbbf24', '#f97316'];
+export function Confetti({ count = 44 }) {
+  const colors = ['#55ff55', '#ffff55', '#55ffff', '#ff55ff', '#ffaa00'];
   return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden z-20" aria-hidden>
+    <div className="pointer-events-none fixed inset-0 overflow-hidden z-50" aria-hidden>
       {Array.from({ length: count }).map((_, i) => (
         <span
           key={i}
-          className="absolute top-0 w-2 h-3 animate-confetti"
-          style={{
-            left: `${(i * 37) % 100}%`,
-            background: colors[i % colors.length],
-            animationDelay: `${(i % 10) * 0.12}s`,
-          }}
+          className="absolute top-0 w-3 h-3 animate-confetti"
+          style={{ left: `${(i * 37) % 100}%`, background: colors[i % colors.length], animationDelay: `${(i % 11) * 0.13}s` }}
         />
       ))}
     </div>

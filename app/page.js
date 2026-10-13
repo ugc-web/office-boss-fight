@@ -3,7 +3,7 @@ import Game from '@/components/Game';
 
 export default function Page() {
   return (
-    <main className="min-h-screen flex items-start sm:items-center justify-center sm:p-8">
+    <main className="min-h-[100dvh]">
       <Suspense fallback={null}>
         <Game />
       </Suspense>
