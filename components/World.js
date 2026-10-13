@@ -7,7 +7,9 @@ const BIOMES = {
   swamp:  { sky: 'linear-gradient(180deg,#4d6b4a 0%,#8aa37a 75%)', ground: 'grass', under: 'mud', clouds: true, trees: true, fog: 'rgba(120,160,110,.25)', label: 'Spreadsheet Swamp' },
   end:    { sky: 'radial-gradient(ellipse at 50% 30%,#2b1a40 0%,#0d0716 70%)', ground: 'endstone', under: 'endstone', stars: true, pillars: true, label: 'The Endless Meeting' },
   desert: { sky: 'linear-gradient(180deg,#f0b46a 0%,#ffd9a0 70%)', ground: 'sand', under: 'sand', clouds: true, cactus: true, label: 'Slide Desert' },
-  nether: { sky: 'linear-gradient(180deg,#3a0b0b 0%,#7a1a10 70%,#b33b14 100%)', ground: 'netherrack', under: 'netherrack', lava: true, embers: true, label: 'The Nether Deadline' },
+  nether: { sky: 'linear-gradient(180deg,#3a0b0b 0%,#7a1a10 70%,#b33b14 100%)', ground: 'netherrack', under: 'netherrack', lava: true, embers: true, label: 'Deadline Volcano' },
+  city: { sky: 'linear-gradient(180deg,#0b1026 0%,#1b2550 60%,#3b3a6b 100%)', ground: 'stone', under: 'deepslate', stars: true, skyline: '#111633', windows: '#facc15', searchlights: true, label: 'The Open-Plan Office' },
+  tower: { sky: 'linear-gradient(180deg,#1e0b3a 0%,#5b2a86 45%,#d97706 85%,#fbbf24 100%)', ground: 'obsidian', under: 'purpur', skyline: '#1a0b2e', windows: '#c084fc', gold: true, label: 'The Top Floor' },
 };
 
 const Cloud = ({ top, w, delay, dur = 70 }) => (
@@ -41,6 +43,20 @@ export default function World({ biome = 'menu', block = 40, children, className 
           <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-4 h-4 bg-fuchsia-300 animate-drift" style={{ boxShadow: '0 0 14px #f0abfc' }} />
         </div>
       ))}
+      {b.skyline && (
+        <div className="absolute inset-x-0 bottom-[28%] h-[46%] pointer-events-none">
+          {[[0, 46, 9], [8, 70, 7], [14, 38, 10], [23, 82, 8], [30, 56, 11], [40, 92, 7], [46, 64, 9], [54, 44, 8], [61, 78, 10], [70, 52, 7], [76, 88, 9], [84, 60, 8], [91, 74, 9]].map(([l, h, w], i) => (
+            <div key={i} className="absolute bottom-0" style={{ left: `${l}%`, width: `${w}%`, height: `${h}%`, background: b.skyline, boxShadow: 'inset -4px 0 0 rgba(255,255,255,.04)' }}>
+              <div className="absolute inset-[8%] opacity-80" style={{ backgroundImage: `radial-gradient(${b.windows} 0 1.5px, transparent 2px)`, backgroundSize: '9px 11px', maskImage: 'linear-gradient(0deg, rgba(0,0,0,.25), #000)' }} />
+              {i % 4 === 1 && <span className="absolute -top-2 left-1/2 w-1 h-2 bg-red-500 animate-blink" />}
+            </div>
+          ))}
+        </div>
+      )}
+      {b.searchlights && [20, 75].map((l, i) => (
+        <div key={l} className="absolute bottom-[28%] w-[16%] h-[70%] origin-bottom opacity-25 animate-drift" style={{ left: `${l}%`, background: 'linear-gradient(0deg, #fde68a, transparent)', clipPath: 'polygon(45% 100%, 55% 100%, 100% 0, 0 0)', animationDuration: `${5 + i}s` }} />
+      ))}
+      {b.gold && <div className="absolute left-1/2 bottom-[30%] w-40 h-40 -translate-x-1/2 rounded-full" style={{ background: 'radial-gradient(circle, #fde68a, #f59e0b 45%, transparent 70%)', opacity: 0.55 }} />}
       {b.clouds && (
         <>
           <Cloud top="8%" w={120} delay={-10} />

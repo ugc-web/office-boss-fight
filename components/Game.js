@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { BOSSES, GAME_OVER_MESSAGES, VICTORY_MESSAGES } from '@/lib/bosses.mjs';
-import { buildRounds, initialState, startRound, answer, next, timeout, getTitle, bossIndexOf, feedbackDelay } from '@/lib/game.mjs';
+import { buildRounds, initialState, startRound, answer, next, timeout, getTitle, bossIndexOf, feedbackDelay, unleash, ultimateReady, doubleCheck, modelSwap } from '@/lib/game.mjs';
 import { STYLES, PRESETS } from '@/lib/fighters.mjs';
 import { KINDS, attackContext, commentFor, createMoveHistory } from '@/lib/moves.mjs';
 import { track, getBest, saveBest } from '@/lib/analytics';
@@ -15,7 +15,7 @@ import Finale from './Finale';
 import Results from './Results';
 import { Screen } from './Extras';
 
-const WINDUP_SFX = { shot: 'swoosh', dash: 'swoosh', uppercut: 'swoosh', slam: 'swoosh', spin: 'swoosh', rain: 'magic', beam: 'beam', summon: 'rumble', teleport: 'blink' };
+const WINDUP_SFX = { shot: 'swoosh', dash: 'swoosh', uppercut: 'swoosh', slam: 'swoosh', spin: 'swoosh', rain: 'magic', beam: 'beam', summon: 'rumble', teleport: 'blink', ultimate: 'ult' };
 const HIT_SFX = { arrow: 'hit', slash: 'slash', fist: 'punch', orb: 'zap' };
 
 /** Sound design for one attack, timed to the animation in Arena.js. */
@@ -29,7 +29,12 @@ function playAttack(move, attacker, last, boss, style) {
   if (move.kind === 'shot') at(k.impact - 380, attacker === 'hero' && heroFx === 'arrow' ? 'arrow' : 'swoosh');
   if (move.kind === 'slam') at(k.impact, 'slam');
   const hit = attacker === 'hero' ? HIT_SFX[heroFx] : 'punch';
-  for (let i = 0; i < Math.min(move.hits, 6); i++) at(k.impact + i * 90, hit);
+  for (let i = 0; i < Math.min(move.hits, move.ultimate ? 10 : 6); i++) at(k.impact + i * (move.ultimate ? 60 : 90), hit);
+  if (move.ultimate) {
+    setTimeout(() => announce(move.name, { pitch: 0.5 }), 150);
+    at(k.impact - 300, 'beam');
+    at(k.impact + 700, 'heal');
+  }
   if (attacker === 'hero') {
     if (move.tier === 3) at(k.impact + 60, 'crit');
     at(k.impact + 260, 'xp');
@@ -114,7 +119,7 @@ export default function Game() {
     setRuns((r) => r + 1);
     moves.current = createMoveHistory();
     setFx(null);
-    setState(initialState(buildRounds(BOSSES)));
+    setState(initialState(buildRounds(BOSSES), f.style));
     setNewBest(false);
     setScreen('game');
     startMusic(BOSSES[0].sprite);
@@ -122,40 +127,79 @@ export default function Game() {
 
   const fight = useCallback(() => setState((s) => startRound(s)), []);
 
-  const resolve = useCallback(
-    (s, prev) => {
-      const { q, bossIndex } = prev.rounds[prev.round];
-      const b = BOSSES[bossIndex];
-      // Whoever won the question attacks, with a move that fits the moment and never repeats back to back.
-      const atk = attackContext(prev, s);
-      const pool = atk.attacker === 'hero' ? STYLES[fighter.style].moves : b.moves;
-      const move = moves.current.pick(atk.attacker, pool, atk.tiers);
-      const comment = commentFor(atk.attacker, atk.ctx, { hero: fighter.name, boss: b.name, n: s.streak });
-      setFx({ key: `${prev.round}-${move.name}`, attacker: atk.attacker, move, ctx: atk.ctx, comment });
+  // Start an attack: `s` is the state after the answer, `prev` the state before it.
+  const launch = useCallback(
+    (s, prev, move, attacker, ctx) => {
+      const b = BOSSES[prev.rounds[prev.round].bossIndex];
+      const comment = move.ultimate ? `${fighter.name} unleashes ${move.name}!` : commentFor(attacker, ctx, { hero: fighter.name, boss: b.name, n: s.streak });
+      setFx({ key: `${prev.round}-${move.name}`, attacker, move, ctx, comment, prev: { hp: prev.hp, bossHp: prev.bossHp, meter: prev.meter } });
       setState(s);
-      track('answer', { boss: b.id, question: q.id, type: q.type, round: prev.round + 1, correct: s.last.correct, timeout: s.last.timeout, move: move.name });
-      playAttack(move, atk.attacker, s.last, b, fighter.style);
+      playAttack(move, attacker, s.last, b, fighter.style);
     },
     [fighter]
   );
 
+  const track_ = (s, prev, move) => {
+    const { q, bossIndex } = prev.rounds[prev.round];
+    track('answer', { boss: BOSSES[bossIndex].id, question: q.id, type: q.type, round: prev.round + 1, correct: s.last.correct, timeout: s.last.timeout, blocked: s.last.blocked, move });
+  };
+
+  // Wrong answer or timeout: the boss attacks. Whoever won the question attacks, with a move that fits the moment.
+  const bossAttack = useCallback(
+    (s, prev) => {
+      const b = BOSSES[prev.rounds[prev.round].bossIndex];
+      const atk = attackContext(prev, s);
+      const move = moves.current.pick('boss', b.moves, atk.tiers);
+      track_(s, prev, move.name);
+      launch(s, prev, move, 'boss', atk.ctx);
+    },
+    [launch]
+  );
+
+  // Fights play themselves: answer right and your fighter attacks with a move that fits the moment
+  // (the ultimate fires on its own when the meter is full); answer wrong and the boss attacks.
   const onAnswer = useCallback(
     (opt) => {
       if (locked.current || state?.phase !== 'playing') return;
       locked.current = true;
       setTimeout(() => (locked.current = false), 600);
-      resolve(answer(state, opt), state);
+      if (!opt.correct) {
+        bossAttack(answer(state, opt), state);
+        return;
+      }
+      let s = answer(state, opt);
+      const atk = attackContext(state, s);
+      let move;
+      if (ultimateReady(s)) {
+        move = { name: STYLES[fighter.style].ultimate, kind: 'ultimate', hits: 12, tier: 3, ultimate: true };
+        s = unleash(s);
+        play('meter');
+      } else {
+        move = moves.current.pick('hero', STYLES[fighter.style].moves, atk.tiers);
+      }
+      track_(s, state, move.name);
+      launch(s, state, move, 'hero', atk.ctx);
     },
-    [state, resolve]
+    [state, fighter, launch, bossAttack]
   );
 
   const onTimeout = useCallback(() => {
     if (state?.phase !== 'playing') return;
-    resolve(timeout(state), state);
-  }, [state, resolve]);
+    bossAttack(timeout(state), state);
+  }, [state, bossAttack]);
+
+  // Perks trigger by themselves (see Battle): Double-Check removes a wrong answer, Model Swap swaps a question.
+  const onPerk = useCallback(() => {
+    const s = fighter.style === 'archer' ? doubleCheck(state) : fighter.style === 'mage' ? modelSwap(state, BOSSES) : state;
+    if (s === state) return false;
+    play(fighter.style === 'mage' ? 'magic' : 'perk');
+    track('perk', { style: fighter.style, round: state.round + 1 });
+    setState(s);
+    return true;
+  }, [state, fighter]);
 
   const onNext = useCallback(() => {
-    if (locked.current || state?.phase !== 'feedback') return;
+    if (locked.current || state?.phase !== 'feedback' || !fx) return;
     const s = next(state);
     setState(s);
     setFx(null);
@@ -171,7 +215,7 @@ export default function Game() {
     } else if (s.phase === 'intro') {
       play('vs');
     }
-  }, [state, fighter]);
+  }, [state, fighter, fx]);
 
   // No "Next" button: after the feedback has been shown, move on by itself.
   // Right answers move on quickly; wrong answers wait longer so the right answer can be read.
@@ -179,11 +223,12 @@ export default function Game() {
   advance.current = onNext;
   const phase = state?.phase;
   const lastResult = state?.last;
+  // The clock starts once the attack has started (after the attack cards / block bar).
   useEffect(() => {
-    if (screen !== 'game' || phase !== 'feedback') return;
-    const id = setTimeout(() => advance.current(), feedbackDelay(lastResult));
+    if (screen !== 'game' || phase !== 'feedback' || !fx) return;
+    const id = setTimeout(() => advance.current(), feedbackDelay(lastResult) + (lastResult?.ultimate ? 1600 : 0));
     return () => clearTimeout(id);
-  }, [screen, phase, lastResult]);
+  }, [screen, phase, lastResult, fx]);
 
   const toggleMute = () => {
     setMuted(!muted);
@@ -209,6 +254,7 @@ export default function Game() {
           state={state}
           fx={fx}
           onAnswer={onAnswer}
+          onPerk={onPerk}
           onNext={onNext}
           onTimeout={onTimeout}
           onFight={fight}

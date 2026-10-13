@@ -12,6 +12,11 @@ function Part({ p, u }) {
       className={`absolute ${p.cls ? `m-${p.cls}` : ''}`}
       style={{ left: p.x * u, top: p.y * u, width: p.w * u, height: p.h * u, background: p.bg, boxShadow: solid ? shade(u) : undefined, ...p.st }}
     >
+      {p.text && (
+        <span className="absolute inset-0 flex items-center justify-center font-title leading-none whitespace-nowrap" style={{ fontSize: Math.max(4, u * 1.7), color: p.tc, letterSpacing: "-0.04em" }}>
+          {p.text}
+        </span>
+      )}
       {p.kids.map((k, i) => <Part key={i} p={k} u={u} />)}
     </div>
   );

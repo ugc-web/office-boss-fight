@@ -12,7 +12,7 @@ export const metadata = {
   description: 'A fun, blocky game that teaches anyone how to use AI at work. No tech skills needed.',
   openGraph: {
     title: 'Office Boss Fight',
-    description: 'Beat the Inbox Hydra, Excel Slime & Deadline Dragon with AI. A fun AI game for everyone. No tech skills needed.',
+    description: 'Pick your fighter and beat the Inbox Hydra, Meeting Golem, Micromanager Drone, Deadline T-Rex and CEO Final Form with AI.',
     type: 'website',
   },
   twitter: { card: 'summary', title: 'Office Boss Fight', description: 'Become the AI Overlord.' },

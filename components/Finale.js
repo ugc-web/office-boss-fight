@@ -3,7 +3,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Mob from './Mob';
 import World from './World';
 import { Confetti, Particles } from './ui';
-import { useLayout, useSize } from './Arena';
+import { CutIn, useLayout, useSize } from './Arena';
+import { HeroFigure, BossFigure, actionArt } from './Sprite';
 import { STYLES } from '@/lib/fighters.mjs';
 import { finaleWords } from '@/lib/moves.mjs';
 import { getTitle } from '@/lib/game.mjs';
@@ -21,12 +22,12 @@ const HIT_SFX = { arrow: 'hit', slash: 'slash', fist: 'punch', orb: 'zap' };
 export default function Finale({ victory, boss, fighter, state, onDone }) {
   const ref = useRef(null);
   const { w, h } = useSize(ref);
-  const L = useLayout(w, h, boss);
+  const L = useLayout(w, h, boss, fighter);
   const model = useMemo(() => heroModel(fighter), [fighter]);
   const style = STYLES[fighter.style];
   const words = finaleWords({ victory, hp: state.hp, score: state.score, boss, heroName: fighter.name });
   const ultimate = victory ? style.ultimate : boss.moves.find((m) => m.tier === 3)?.name || 'Final Blow';
-  const color = victory ? fighter.accent : boss.color;
+  const color = victory ? style.color : boss.color;
   const glow = victory ? '#facc15' : '#ef4444';
   const totalHits = victory ? 18 + Math.round(state.score / 10) : 15;
 
@@ -100,12 +101,12 @@ export default function Finale({ victory, boss, fighter, state, onDone }) {
       {/* Fighters */}
       <div className="absolute z-[5]" style={{ left: heroX, bottom: L.ground, transition: 'left .18s steps(3)' }}>
         <div key={`h-${heroAtk ? 'a' : defKey}`} className={heroAtk ? '' : defClass} style={{ '--dir': -1, '--hits': 30 }}>
-          <Mob name="hero" model={model} variant={fighter.style} height={L.heroH} pose={heroAtk ? atkPose : defPose} />
+          <HeroFigure fighter={fighter} model={model} height={L.heroH} pose={heroAtk ? atkPose : defPose} />
         </div>
       </div>
       <div className="absolute z-[5]" style={{ left: foeX, bottom: L.ground, transition: 'left .18s steps(3)', filter: `drop-shadow(0 0 12px ${boss.color})` }}>
         <div key={`b-${heroAtk ? defKey : 'a'}`} className={heroAtk ? defClass : ''} style={{ '--dir': 1, '--hits': 30 }}>
-          <Mob name={boss.sprite} height={L.bossH} pose={heroAtk ? defPose : atkPose} />
+          <BossFigure boss={boss} height={L.bossH} pose={heroAtk ? defPose : atkPose} />
         </div>
       </div>
 
@@ -124,9 +125,15 @@ export default function Finale({ victory, boss, fighter, state, onDone }) {
       <div className="absolute bottom-0 inset-x-0 h-[9%] bg-black z-[30] letterbox origin-bottom" />
 
       {phase === 'cry' && (
-        <div className="absolute inset-0 z-[35] flex items-center justify-center pointer-events-none">
-          <p className="cue-fight font-title text-6xl sm:text-8xl lg:text-9xl uppercase text-center leading-none" style={{ color: glow, textShadow: '6px 6px 0 #000', animationDuration: '1.1s' }}>{words.cry}</p>
-        </div>
+        <CutIn
+          art={actionArt(victory ? fighter.art : boss.art)}
+          fallback={<Mob name="hero" model={model} variant={fighter.style} height={Math.min(240, h * 0.4)} pose="attack" />}
+          name={ultimate}
+          label={words.cry}
+          color={color}
+          side={victory ? 'left' : 'right'}
+          ms={T.rush}
+        />
       )}
 
       {/* Ultimate name + hit counter */}

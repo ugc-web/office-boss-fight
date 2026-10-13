@@ -2,13 +2,30 @@
 import { useEffect, useMemo, useState } from 'react';
 import Mob from './Mob';
 import { heroModel } from '@/lib/mobs';
-import { STYLES, PRESETS, SKINS, HAIR_COLORS, HAIR_STYLES, OUTFITS, PANTS, ACCENTS, EXTRAS, NAME_MAX, MAX_CUSTOM, randomLook, sanitizeFighter } from '@/lib/fighters.mjs';
+import { STYLES, STAT_LABELS, PRESETS, SKINS, HAIR_COLORS, HAIR_STYLES, OUTFITS, PANTS, ACCENTS, EXTRAS, CUTS, BEARDS, HATS, NAME_MAX, MAX_CUSTOM, randomLook, sanitizeFighter } from '@/lib/fighters.mjs';
 import { loadCustom, saveCustom, fullRoster, getSelectedId, setSelectedId } from '@/lib/roster';
 import { play, announce } from '@/lib/sound';
 import { track } from '@/lib/analytics';
+import { artFit } from './Sprite';
 
 const KIND_ICON = { shot: '➶', dash: '»', uppercut: '⤴', slam: '⤓', rain: '☄', beam: '═', summon: '⇡', spin: '⟳', teleport: '✧' };
-const LABELS = { short: 'Short', long: 'Long', bun: 'Bun', spiky: 'Spiky', cap: 'Cap', bald: 'Bald', none: 'None', headset: 'Headset', glasses: 'Glasses', headband: 'Headband' };
+const LABELS = { short: 'Short', long: 'Long', bun: 'Top-knot', spiky: 'Spiky', cap: 'Cap', bald: 'Bald', none: 'None', headset: 'Headset', glasses: 'Glasses', headband: 'Headband', office: 'Office shirt', samurai: 'Samurai coat', monk: 'Monk robe', wizard: 'Wizard robe' };
+
+/** Speed / Power / Range / Difficulty, 5 blocks each, in the style's colour. */
+function Stats({ style }) {
+  return (
+    <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+      {Object.entries(style.stats).map(([k, v]) => (
+        <div key={k} className="flex items-center gap-2">
+          <span className="font-title text-[10px] sm:text-xs text-white/80 w-20 uppercase">{STAT_LABELS[k]}</span>
+          <span className="flex gap-[2px]">
+            {[1, 2, 3, 4, 5].map((i) => <i key={i} className="block w-3 h-2.5 sm:w-4 sm:h-3 border border-black" style={{ background: i <= v ? style.color : '#1f1b2e', boxShadow: i <= v ? `0 0 6px ${style.color}` : undefined }} />)}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 function Fighter({ f, height, pose = 'idle' }) {
   const model = useMemo(() => heroModel(f), [f]);
@@ -121,7 +138,12 @@ function Creator({ initial, onSave, onCancel }) {
               <Swatches label="Trousers" list={PANTS} value={d.pants} onChange={set('pants')} />
             </div>
             <Swatches label="Accent (tie, gloves, glow)" list={ACCENTS} value={d.accent} onChange={set('accent')} />
+            <Choices label="Outfit" list={CUTS} value={d.cut} onChange={set('cut')} />
             <Choices label="Hair" list={HAIR_STYLES} value={d.hairStyle} onChange={set('hairStyle')} />
+            <div className="grid sm:grid-cols-2 gap-3">
+              <Choices label="Beard" list={BEARDS} value={d.beard} onChange={set('beard')} />
+              <Choices label="Hat" list={HATS} value={d.hat} onChange={set('hat')} />
+            </div>
             <Choices label="Extra" list={EXTRAS} value={d.extra} onChange={set('extra')} />
           </div>
         </div>
@@ -213,31 +235,50 @@ export default function FighterSelect({ current, onPick, onBack }) {
   });
 
   return (
-    <div className="fixed inset-0 z-10 overflow-y-auto" style={{ background: `radial-gradient(ellipse at 30% 60%, ${sel.accent}33, transparent 55%), linear-gradient(180deg,#0d0b14,#1a1426)` }}>
+    <div className="fixed inset-0 z-10 overflow-y-auto" style={{ background: `radial-gradient(ellipse at 30% 60%, ${style.color}33, transparent 55%), linear-gradient(180deg,#0d0b14,#1a1426)` }}>
       <div className="min-h-full max-w-6xl mx-auto px-3 sm:px-6 py-3 sm:py-6 flex flex-col gap-3 sm:gap-4">
         <h2 className="font-title text-2xl sm:text-5xl text-center uppercase pr-20 sm:pr-0" style={{ color: '#fde047', textShadow: '4px 4px 0 #7a3d00, 0 0 24px #f80' }}>Select your fighter</h2>
 
         <div className="grid gap-3 sm:gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] flex-1">
-          {/* Preview */}
-          <div className="relative mc-dark overflow-hidden flex flex-col sm:flex-row lg:flex-col items-center gap-3 p-3 sm:p-5" style={{ background: `radial-gradient(ellipse at 50% 80%, ${sel.accent}44, rgba(16,0,16,.9) 60%)` }}>
-            <div className="relative flex items-end justify-center h-[11rem] sm:h-[15rem] lg:h-[18rem] w-full sm:w-1/2 lg:w-full shrink-0">
-              <div className="absolute bottom-1 w-44 h-6 rounded-[50%] bg-black/60" style={{ boxShadow: `0 0 30px ${sel.accent}` }} />
-              <div key={sel.id} className="relative animate-walkInL" style={{ animationDuration: '.5s' }}>
-                <Fighter f={sel} height={typeof window !== 'undefined' && window.innerHeight < 700 ? 150 : 230} pose={locked ? 'cheer' : 'idle'} />
+          {/* Preview: the sheet art for the 4 main fighters, the live model for custom ones */}
+          <div className="relative mc-dark overflow-hidden flex flex-col gap-3 p-0" style={{ boxShadow: `inset 0 0 0 3px ${style.color}`, background: `radial-gradient(ellipse at 50% 80%, ${style.color}44, rgba(16,0,16,.95) 60%)` }}>
+            <div key={sel.id} className="relative h-[12rem] sm:h-[16rem] lg:h-[19rem] w-full shrink-0 overflow-hidden select-art">
+              {sel.art ? (
+                <img src={sel.art} alt={`${sel.name} character art`} className={`absolute inset-0 w-full h-full ${artFit(sel.art)}`} />
+              ) : (
+                <div className="absolute inset-0 flex items-end justify-center pb-3">
+                  <div className="absolute bottom-2 w-44 h-6 rounded-[50%] bg-black/60" style={{ boxShadow: `0 0 30px ${style.color}` }} />
+                  <div className="relative"><Fighter f={sel} height={typeof window !== 'undefined' && window.innerHeight < 700 ? 150 : 220} pose={locked ? 'cheer' : 'idle'} /></div>
+                </div>
+              )}
+              <div className="absolute inset-0" style={{ background: 'linear-gradient(0deg, rgba(11,10,16,.95), transparent 55%)' }} />
+              {sel.art && !sel.art.startsWith('/sprites/') && (
+                <div className="absolute right-2 bottom-2 sm:right-4 sm:bottom-3 flex flex-col items-center" title="In-game model">
+                  <Fighter f={sel} height={84} pose={locked ? 'cheer' : 'idle'} />
+                  <span className="font-pixel text-[10px] text-white/60 mt-0.5">in game</span>
+                </div>
+              )}
+              <div className="absolute left-3 bottom-2 sm:left-5 sm:bottom-3 pr-24">
+                <p className="font-title text-2xl sm:text-4xl text-white uppercase leading-none break-words" style={{ textShadow: `3px 3px 0 #000, 0 0 18px ${style.color}` }}>{sel.name}</p>
+                <p className="font-title text-sm sm:text-lg uppercase mt-1" style={{ color: style.color, textShadow: '2px 2px 0 #000' }}>{style.icon} {style.label}</p>
+                <p className="font-pixel text-sm sm:text-base text-white/90 italic">“{style.tagline}”</p>
               </div>
             </div>
-            <div className="w-full text-center sm:text-left lg:text-center">
-              <p className="font-title text-2xl sm:text-4xl text-white uppercase leading-none break-words" style={{ textShadow: `3px 3px 0 #000, 0 0 18px ${sel.accent}` }}>{sel.name}</p>
-              <p className="font-pixel text-base sm:text-lg text-mcyellow mt-1">{style.icon} {style.label}</p>
+            <div className="px-3 pb-3 sm:px-5 sm:pb-4 space-y-2.5">
               <p className="font-pixel text-sm sm:text-base text-white/80">{style.blurb}</p>
-              <ul className="mt-2 grid grid-cols-2 gap-x-3 gap-y-0.5 text-left font-pixel text-xs sm:text-sm">
+              <Stats style={style} />
+              <div className="border-2 border-black px-2.5 py-1.5" style={{ background: `${style.color}33` }}>
+                <p className="font-title text-xs sm:text-sm uppercase" style={{ color: style.color }}>{style.perk.icon} Perk: {style.perk.name}</p>
+                <p className="font-pixel text-sm text-white/90 leading-snug">{style.perk.text}</p>
+              </div>
+              <ul className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-left font-pixel text-xs sm:text-sm">
                 {style.moves.map((m) => (
                   <li key={m.name} className="text-white/90 truncate" title={m.name}>
                     <span className="text-mcaqua">{KIND_ICON[m.kind]}</span> {m.name} <span className="text-mcgold">{'★'.repeat(m.tier)}</span>
                   </li>
                 ))}
               </ul>
-              <p className="font-pixel text-xs sm:text-sm text-mcred mt-1.5">Ultimate: <span className="text-white">{style.ultimate}</span></p>
+              <p className="font-pixel text-xs sm:text-sm text-mcred">⚡ Ultimate: <span className="text-white">{style.ultimate}</span></p>
             </div>
           </div>
 
@@ -253,14 +294,19 @@ export default function FighterSelect({ current, onPick, onBack }) {
                     aria-selected={on}
                     onClick={() => choose(f.id)}
                     onDoubleClick={pick}
-                    className={`relative flex flex-col items-center justify-end h-28 sm:h-32 p-1.5 border-[3px] transition-transform ${on ? 'border-mcyellow -translate-y-1' : 'border-black hover:border-white/60'}`}
-                    style={{ background: on ? `linear-gradient(180deg, ${f.accent}66, #1b1530)` : 'linear-gradient(180deg,#2a2440,#141020)', boxShadow: on ? `0 0 0 2px #000, 0 0 18px ${f.accent}` : 'inset 0 0 0 2px #3a3358' }}
+                    className={`relative overflow-hidden flex flex-col items-center justify-end h-28 sm:h-32 p-1.5 border-[3px] transition-transform ${on ? 'border-mcyellow -translate-y-1' : 'border-black hover:border-white/60'}`}
+                    style={{ background: on ? `linear-gradient(180deg, ${STYLES[f.style].color}66, #1b1530)` : 'linear-gradient(180deg,#2a2440,#141020)', boxShadow: on ? `0 0 0 2px #000, 0 0 18px ${STYLES[f.style].color}` : 'inset 0 0 0 2px #3a3358' }}
                   >
-                    {on && <span className="absolute top-1 left-1 font-title text-[10px] px-1 bg-mcyellow text-black">P1</span>}
+                    {on && <span className="absolute z-10 top-1 left-1 font-title text-[10px] px-1 bg-mcyellow text-black">P1</span>}
                     {f.preset ? null : <span className="absolute top-1 right-1 font-pixel text-[10px] text-mcaqua">custom</span>}
-                    <Fighter f={f} height={64} />
-                    <span className="font-pixel text-xs sm:text-sm text-white truncate w-full text-center mt-1">{f.name}</span>
-                    <span className="text-xs leading-none">{STYLES[f.style].icon}</span>
+                    {f.portrait ? (
+                      <img src={f.portrait} alt="" className="absolute inset-0 w-full h-full object-cover" style={{ opacity: on ? 1 : 0.75 }} />
+                    ) : (
+                      <Fighter f={f} height={64} />
+                    )}
+                    {f.portrait && <span className="absolute inset-x-0 bottom-0 h-1/2" style={{ background: 'linear-gradient(0deg, #0b0a10, transparent)' }} />}
+                    <span className="relative font-pixel text-xs sm:text-sm text-white truncate w-full text-center mt-1" style={{ textShadow: '1px 1px 0 #000' }}>{f.name}</span>
+                    <span className="relative text-xs leading-none">{STYLES[f.style].icon}</span>
                   </button>
                 );
               })}

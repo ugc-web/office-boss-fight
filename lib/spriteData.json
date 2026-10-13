@@ -1,0 +1,272 @@
+{
+ "ceo": {
+  "attack": {
+   "foot": 0.607,
+   "h": 720,
+   "src": "/sprites/ceo_attack.webp",
+   "srcH": 1703,
+   "w": 717
+  },
+  "hurt": {
+   "foot": 0.539,
+   "h": 720,
+   "src": "/sprites/ceo_hurt.webp",
+   "srcH": 2011,
+   "w": 541
+  },
+  "ready": {
+   "foot": 0.53,
+   "h": 720,
+   "src": "/sprites/ceo_ready.webp",
+   "srcH": 2151,
+   "w": 526
+  },
+  "victory": {
+   "foot": 0.478,
+   "h": 720,
+   "src": "/sprites/ceo_victory.webp",
+   "srcH": 2246,
+   "w": 406
+  }
+ },
+ "drone": {
+  "attack": {
+   "foot": 0.495,
+   "h": 720,
+   "src": "/sprites/drone_attack.webp",
+   "srcH": 1081,
+   "w": 1231
+  },
+  "hurt": {
+   "foot": 0.465,
+   "h": 720,
+   "src": "/sprites/drone_hurt.webp",
+   "srcH": 1389,
+   "w": 1071
+  },
+  "ready": {
+   "foot": 0.528,
+   "h": 720,
+   "src": "/sprites/drone_ready.webp",
+   "srcH": 1302,
+   "w": 1260
+  },
+  "victory": {
+   "foot": 0.461,
+   "h": 720,
+   "src": "/sprites/drone_victory.webp",
+   "srcH": 1040,
+   "w": 1514
+  }
+ },
+ "golem": {
+  "attack": {
+   "foot": 0.67,
+   "h": 720,
+   "src": "/sprites/golem_attack.webp",
+   "srcH": 1852,
+   "w": 627
+  },
+  "hurt": {
+   "foot": 0.54,
+   "h": 720,
+   "src": "/sprites/golem_hurt.webp",
+   "srcH": 1969,
+   "w": 581
+  },
+  "ready": {
+   "foot": 0.507,
+   "h": 720,
+   "src": "/sprites/golem_ready.webp",
+   "srcH": 2001,
+   "w": 529
+  },
+  "victory": {
+   "foot": 0.476,
+   "h": 720,
+   "src": "/sprites/golem_victory.webp",
+   "srcH": 2057,
+   "w": 531
+  }
+ },
+ "hydra": {
+  "attack": {
+   "foot": 0.538,
+   "h": 720,
+   "src": "/sprites/hydra_attack.webp",
+   "srcH": 1414,
+   "w": 1122
+  },
+  "hurt": {
+   "foot": 0.45,
+   "h": 720,
+   "src": "/sprites/hydra_hurt.webp",
+   "srcH": 1417,
+   "w": 1013
+  },
+  "ready": {
+   "foot": 0.489,
+   "h": 720,
+   "src": "/sprites/hydra_ready.webp",
+   "srcH": 1557,
+   "w": 1002
+  },
+  "victory": {
+   "foot": 0.473,
+   "h": 720,
+   "src": "/sprites/hydra_victory.webp",
+   "srcH": 1536,
+   "w": 864
+  }
+ },
+ "intern": {
+  "attack": {
+   "foot": 0.403,
+   "h": 720,
+   "src": "/sprites/intern_attack.webp",
+   "srcH": 1991,
+   "w": 462
+  },
+  "hurt": {
+   "foot": 0.512,
+   "h": 720,
+   "src": "/sprites/intern_hurt.webp",
+   "srcH": 2017,
+   "w": 602
+  },
+  "ready": {
+   "foot": 0.435,
+   "h": 720,
+   "src": "/sprites/intern_ready.webp",
+   "srcH": 1945,
+   "w": 481
+  },
+  "victory": {
+   "foot": 0.376,
+   "h": 720,
+   "src": "/sprites/intern_victory.webp",
+   "srcH": 2236,
+   "w": 367
+  }
+ },
+ "monk": {
+  "attack": {
+   "foot": 0.401,
+   "h": 720,
+   "src": "/sprites/monk_attack.webp",
+   "srcH": 1844,
+   "w": 618
+  },
+  "hurt": {
+   "foot": 0.525,
+   "h": 720,
+   "src": "/sprites/monk_hurt.webp",
+   "srcH": 1944,
+   "w": 506
+  },
+  "ready": {
+   "foot": 0.422,
+   "h": 720,
+   "src": "/sprites/monk_ready.webp",
+   "srcH": 2014,
+   "w": 539
+  },
+  "victory": {
+   "foot": 0.506,
+   "h": 720,
+   "src": "/sprites/monk_victory.webp",
+   "srcH": 2168,
+   "w": 433
+  }
+ },
+ "samurai": {
+  "attack": {
+   "foot": 0.481,
+   "h": 720,
+   "src": "/sprites/samurai_attack.webp",
+   "srcH": 1557,
+   "w": 773
+  },
+  "hurt": {
+   "foot": 0.556,
+   "h": 720,
+   "src": "/sprites/samurai_hurt.webp",
+   "srcH": 1807,
+   "w": 636
+  },
+  "ready": {
+   "foot": 0.491,
+   "h": 720,
+   "src": "/sprites/samurai_ready.webp",
+   "srcH": 2057,
+   "w": 532
+  },
+  "victory": {
+   "foot": 0.557,
+   "h": 720,
+   "src": "/sprites/samurai_victory.webp",
+   "srcH": 2209,
+   "w": 360
+  }
+ },
+ "trex": {
+  "attack": {
+   "foot": 0.458,
+   "h": 720,
+   "src": "/sprites/trex_attack.webp",
+   "srcH": 1121,
+   "w": 1457
+  },
+  "hurt": {
+   "foot": 0.416,
+   "h": 720,
+   "src": "/sprites/trex_hurt.webp",
+   "srcH": 1580,
+   "w": 967
+  },
+  "ready": {
+   "foot": 0.519,
+   "h": 720,
+   "src": "/sprites/trex_ready.webp",
+   "srcH": 1522,
+   "w": 1007
+  },
+  "victory": {
+   "foot": 0.39,
+   "h": 720,
+   "src": "/sprites/trex_victory.webp",
+   "srcH": 1523,
+   "w": 951
+  }
+ },
+ "wizard": {
+  "attack": {
+   "foot": 0.461,
+   "h": 720,
+   "src": "/sprites/wizard_attack.webp",
+   "srcH": 1661,
+   "w": 573
+  },
+  "hurt": {
+   "foot": 0.496,
+   "h": 720,
+   "src": "/sprites/wizard_hurt.webp",
+   "srcH": 1928,
+   "w": 568
+  },
+  "ready": {
+   "foot": 0.505,
+   "h": 720,
+   "src": "/sprites/wizard_ready.webp",
+   "srcH": 2050,
+   "w": 488
+  },
+  "victory": {
+   "foot": 0.513,
+   "h": 720,
+   "src": "/sprites/wizard_victory.webp",
+   "srcH": 2181,
+   "w": 478
+  }
+ }
+}

@@ -66,7 +66,7 @@ export default function Results({ state, fighter, victory, message, newBest, onR
         {newBest && <span className="absolute top-3 -right-9 rotate-45 bg-mcyellow text-black font-pixel text-xs px-9 py-0.5 border-y-2 border-black">NEW BEST</span>}
         <p className="font-title text-sm text-[#3f3f3f] tracking-widest text-center">🏹 Office Boss Fight</p>
         <div className="flex items-center gap-4 mt-3">
-          <div className="mc-slot p-2 shrink-0"><Mob name="hero" model={model} variant={fighter.style} height={72} pose={victory ? 'cheer' : 'idle'} title={fighter.name} /></div>
+          <div className="mc-slot p-2 shrink-0">{fighter.portrait ? <img src={fighter.portrait} alt={fighter.name} className="w-[72px] h-[72px] object-cover border-2 border-black" /> : <Mob name="hero" model={model} variant={fighter.style} height={72} pose={victory ? 'cheer' : 'idle'} title={fighter.name} />}</div>
           <div className="min-w-0">
             <p className="font-pixel text-sm text-[#555]">{fighter.name} · rank earned</p>
             <p className="font-title text-xl sm:text-2xl leading-tight text-[#5b2a86]">{title}</p>
