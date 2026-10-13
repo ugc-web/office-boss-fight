@@ -6,3 +6,4 @@ out
 # local env files and macOS junk
 .env*.local
 .DS_Store
+.claude/

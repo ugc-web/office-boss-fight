@@ -134,6 +134,114 @@ html, body { background: #1b1b1b; color: #f2f2f2; overflow-x: hidden; }
 @keyframes mb-jump { 0%,100% { transform: translateY(0); } 50% { transform: translateY(calc(var(--u) * -4)); } }
 @keyframes splash { from { transform: rotate(-14deg) scale(0.95); } to { transform: rotate(-14deg) scale(1.08); } }
 
+/* hero fighting styles: different swings for the attack pose */
+.mob-hero[data-variant='blade'][data-pose='attack'] .m-arm-r { animation: mb-slash 0.6s steps(5) forwards; }
+.mob-hero[data-variant='brawler'][data-pose='attack'] .m-arm-r { animation: mb-punch 0.3s steps(3) infinite; }
+.mob-hero[data-variant='brawler'][data-pose='attack'] .m-arm-l { animation: mb-punch 0.3s steps(3) infinite 0.15s; }
+.mob-hero[data-variant='mage'][data-pose='attack'] .m-arm-r { animation: mb-raise 0.6s steps(4) forwards; }
+.mob-hero[data-variant='blade'][data-pose='attack'] .m-arm-l, .mob-hero[data-variant='mage'][data-pose='attack'] .m-arm-l { animation: mb-sway 0.4s steps(2) infinite; }
+/* cast: arms up, glowing */
+.mob[data-pose='cast'] .m-arm-l, .mob[data-pose='cast'] .m-arm-r { transform: rotate(165deg); }
+.mob[data-pose='cast'] .mob-body { animation: mb-cast 0.5s steps(2) infinite; }
+
+@keyframes mb-slash { 0% { transform: rotate(0); } 35% { transform: rotate(-160deg); } 60%,100% { transform: rotate(40deg); } }
+@keyframes mb-punch { 0%,100% { transform: rotate(0); } 50% { transform: rotate(-95deg) translateY(calc(var(--u) * 1)); } }
+@keyframes mb-raise { 0% { transform: rotate(0); } 50%,100% { transform: rotate(-150deg); } }
+@keyframes mb-cast { 0% { filter: drop-shadow(0 0 4px #fff) brightness(1.1); } 100% { filter: drop-shadow(0 0 12px #fff) brightness(1.4); } }
+
+/* ---------- Fight choreography (see lib/moves.mjs) ----------
+   --dir: 1 when the hero attacks (moves right), -1 when the boss attacks.
+   --reach: px distance from the attacker to the defender, set by the Arena. */
+.atk-dash { animation: atk-dash 1.1s cubic-bezier(.3,.7,.3,1) both; }
+.atk-uppercut { animation: atk-uppercut 1.2s cubic-bezier(.3,.7,.3,1) both; }
+.atk-slam { animation: atk-slam 1.25s cubic-bezier(.4,0,.6,1) both; }
+.atk-spin { animation: atk-spin 1.25s cubic-bezier(.4,0,.4,1) both; }
+.atk-teleport { animation: atk-teleport 1.2s steps(12) both; }
+.atk-shot, .atk-beam { animation: atk-recoil 1.1s ease-out both; }
+.atk-rain, .atk-summon { animation: atk-rise 1.4s ease-out both; }
+
+@keyframes atk-dash { 0% { transform: translateX(0); } 18% { transform: translateX(calc(var(--dir) * -14px)); } 40%,62% { transform: translateX(calc(var(--dir) * var(--reach))); } 100% { transform: translateX(0); } }
+@keyframes atk-uppercut { 0% { transform: translate(0,0); } 16% { transform: translate(calc(var(--dir) * -12px), 6px); } 38% { transform: translate(calc(var(--dir) * var(--reach)), 0); } 50% { transform: translate(calc(var(--dir) * var(--reach)), -60px); } 70% { transform: translate(calc(var(--dir) * var(--reach)), 0); } 100% { transform: translate(0,0); } }
+@keyframes atk-slam { 0% { transform: translate(0,0) scale(1); } 14% { transform: translate(0,0) scale(1.15,.8); } 40% { transform: translate(calc(var(--dir) * var(--reach) * .5), -170px) scale(.95,1.1); } 64% { transform: translate(calc(var(--dir) * var(--reach)), 0) scale(1.2,.8); } 72%,82% { transform: translate(calc(var(--dir) * var(--reach)), 0) scale(1); } 100% { transform: translate(0,0); } }
+@keyframes atk-spin { 0% { transform: translateX(0) rotate(0); } 45%,58% { transform: translateX(calc(var(--dir) * var(--reach))) rotate(calc(var(--dir) * 1080deg)); } 100% { transform: translateX(0) rotate(calc(var(--dir) * 1440deg)); } }
+@keyframes atk-teleport { 0% { transform: translateX(0); opacity: 1; filter: none; } 15% { transform: translateX(0) scale(.3,1.5); opacity: 0; filter: brightness(4); } 30% { transform: translateX(calc(var(--dir) * var(--reach))) scale(.3,1.5); opacity: 0; } 40% { transform: translateX(calc(var(--dir) * var(--reach))) scale(1); opacity: 1; filter: brightness(2); } 45%,65% { transform: translateX(calc(var(--dir) * var(--reach))); opacity: 1; filter: none; } 75% { transform: translateX(calc(var(--dir) * var(--reach))) scale(.3,1.5); opacity: 0; } 88% { transform: translateX(0) scale(.3,1.5); opacity: 0; } 100% { transform: translateX(0) scale(1); opacity: 1; } }
+@keyframes atk-recoil { 0% { transform: translateX(0); } 20% { transform: translateX(calc(var(--dir) * 8px)); } 45% { transform: translateX(calc(var(--dir) * -16px)); filter: drop-shadow(0 0 14px var(--glow)); } 100% { transform: translateX(0); filter: none; } }
+@keyframes atk-rise { 0% { transform: translateY(0); } 30%,70% { transform: translateY(-28px); filter: drop-shadow(0 0 16px var(--glow)); } 100% { transform: translateY(0); filter: none; } }
+
+/* defender reactions: knocked back, launched, squashed, juggled by a combo */
+.def-hurt { animation: def-hurt 0.6s ease-out both; }
+.def-launch { animation: def-launch 1.05s cubic-bezier(.2,.8,.4,1) both; }
+.def-crush { animation: def-crush 0.75s ease-out both; transform-origin: 50% 100%; }
+.def-combo { animation: def-combo 0.18s steps(2) var(--hits, 3) both; }
+.def-ko { animation: def-ko 1.4s ease-out both; }
+@keyframes def-hurt { 0% { transform: translateX(0); } 25% { transform: translateX(calc(var(--dir) * 26px)); } 100% { transform: translateX(0); } }
+@keyframes def-launch { 0% { transform: translate(0,0) rotate(0); } 35% { transform: translate(calc(var(--dir) * 40px), -120px) rotate(calc(var(--dir) * 35deg)); } 72% { transform: translate(calc(var(--dir) * 52px), 0) rotate(calc(var(--dir) * 10deg)); } 82% { transform: translate(calc(var(--dir) * 52px), -12px) rotate(0); } 100% { transform: translate(0,0); } }
+@keyframes def-crush { 0% { transform: scale(1); } 18% { transform: scale(1.3,.5); } 55% { transform: scale(.92,1.1); } 100% { transform: scale(1); } }
+@keyframes def-combo { 0% { transform: translateX(0); } 50% { transform: translateX(calc(var(--dir) * 10px)) rotate(calc(var(--dir) * 4deg)); } 100% { transform: translateX(calc(var(--dir) * 3px)); } }
+@keyframes def-ko { 0% { transform: translate(0,0); } 40% { transform: translate(calc(var(--dir) * 70px), -40px); } 100% { transform: translate(calc(var(--dir) * 90px), 0); } }
+
+/* projectiles: across, from the sky, out of the ground, beams */
+.proj-fly { animation: proj-fly var(--t, .5s) linear both; }
+.proj-fall { animation: proj-fall .5s cubic-bezier(.5,0,1,1) both; }
+.proj-erupt { animation: proj-erupt .8s cubic-bezier(.2,.8,.3,1) both; }
+.fx-beam { animation: fx-beam .75s ease-out both; }
+.fx-slashmark { animation: fx-slashmark .3s steps(3) both; }
+.fx-ring { animation: fx-ring .6s ease-out both; }
+@keyframes proj-fly { 0% { left: var(--from); transform: translate(-50%, 0) scale(var(--sx, 1), 1); opacity: 0; } 10% { opacity: 1; } 50% { transform: translate(-50%, -22px) scale(var(--sx, 1), 1); } 92% { opacity: 1; } 100% { left: var(--to); transform: translate(-50%, 0) scale(var(--sx, 1), 1); opacity: 0; } }
+@keyframes proj-fall { 0% { transform: translate(-50%, -110%) rotate(var(--rot, 20deg)); opacity: 0; } 15% { opacity: 1; } 100% { transform: translate(-50%, var(--land)) rotate(var(--rot, 20deg)); opacity: 1; } }
+@keyframes proj-erupt { 0% { transform: translate(-50%, 30px) scale(.4); opacity: 0; } 35% { transform: translate(-50%, -50px) scale(1.25); opacity: 1; } 100% { transform: translate(-50%, -110px) scale(.9) rotate(30deg); opacity: 0; } }
+@keyframes fx-beam { 0% { transform: scaleX(0); opacity: 1; } 30% { transform: scaleX(1); opacity: 1; } 45% { transform: scaleX(1) scaleY(1.6); } 60% { transform: scaleX(1) scaleY(.8); opacity: 1; } 100% { transform: scaleX(1) scaleY(0); opacity: 0; } }
+@keyframes fx-slashmark { 0% { transform: rotate(var(--rot, -35deg)) scaleX(0); opacity: 1; } 60% { transform: rotate(var(--rot, -35deg)) scaleX(1); opacity: 1; } 100% { transform: rotate(var(--rot, -35deg)) scaleX(1.1); opacity: 0; } }
+@keyframes fx-ring { 0% { transform: translateX(-50%) scale(.2, .1); opacity: 1; } 100% { transform: translateX(-50%) scale(1.6, .35); opacity: 0; } }
+
+/* stage effects */
+.shake-hard { animation: shake-hard .5s steps(6) 1; }
+.zoom-punch { animation: zoom-punch 1.2s ease-out both; }
+@keyframes shake-hard { 0%,100% { transform: translate(0,0); } 15% { transform: translate(-12px,6px); } 30% { transform: translate(12px,-8px); } 45% { transform: translate(-9px,3px); } 60% { transform: translate(8px,5px); } 80% { transform: translate(-4px,-2px); } }
+@keyframes zoom-punch { 0% { transform: scale(1); } 15% { transform: scale(1.08); } 100% { transform: scale(1); } }
+
+/* callouts: move names slide in from the attacker's side; the announcer pops in the middle */
+.callout { animation: callout 1.9s cubic-bezier(.2,.9,.3,1) both; }
+.callout-r { animation-name: callout-r; }
+.announce-pop { animation: announce-pop 1.25s cubic-bezier(.2,.9,.3,1) both; }
+.combo-count { animation: combo-count .25s steps(3) both; }
+@keyframes callout { 0% { transform: translateX(-120%) skewX(-12deg); opacity: 0; } 12%,80% { transform: translateX(0) skewX(-12deg); opacity: 1; } 100% { transform: translateX(-30%) skewX(-12deg); opacity: 0; } }
+@keyframes callout-r { 0% { transform: translateX(120%) skewX(-12deg); opacity: 0; } 12%,80% { transform: translateX(0) skewX(-12deg); opacity: 1; } 100% { transform: translateX(30%) skewX(-12deg); opacity: 0; } }
+@keyframes announce-pop { 0% { transform: scale(3) rotate(-6deg); opacity: 0; } 12% { transform: scale(.92) rotate(-3deg); opacity: 1; } 20%,82% { transform: scale(1) rotate(-3deg); opacity: 1; } 100% { transform: scale(1.3) rotate(-3deg); opacity: 0; } }
+@keyframes combo-count { 0% { transform: scale(1.8); } 100% { transform: scale(1); } }
+
+/* READY? / FIGHT! cues */
+.cue-ready { animation: cue-ready .9s cubic-bezier(.2,.9,.3,1) both; }
+.cue-fight { animation: cue-fight .8s cubic-bezier(.2,.9,.3,1) both; }
+@keyframes cue-ready { 0% { transform: scale(.2); opacity: 0; letter-spacing: .6em; } 30% { transform: scale(1.05); opacity: 1; } 80% { transform: scale(1); opacity: 1; letter-spacing: .08em; } 100% { transform: scale(1.1); opacity: 0; } }
+@keyframes cue-fight { 0% { transform: scale(5) rotate(-8deg); opacity: 0; } 25% { transform: scale(.9) rotate(-4deg); opacity: 1; } 35%,80% { transform: scale(1) rotate(-4deg); opacity: 1; } 100% { transform: scale(1.6) rotate(-4deg); opacity: 0; } }
+
+/* Tekken-style health bars */
+.fg-bar { position: relative; height: 18px; background: #1a0505; border: 2px solid #000; box-shadow: 0 0 0 2px rgba(255,255,255,.25), inset 0 0 0 1px #000; transform: skewX(-20deg); overflow: hidden; }
+.fg-bar.flip { transform: skewX(20deg); }
+.fg-bar > .trail, .fg-bar > .fill { position: absolute; top: 0; bottom: 0; }
+.fg-bar > .trail { background: #e11d1d; transition: width 1.2s ease-in .5s; }
+.fg-bar > .fill { transition: width .35s steps(6); box-shadow: inset 0 3px 0 rgba(255,255,255,.45), inset 0 -3px 0 rgba(0,0,0,.25); }
+.fg-bar:not(.flip) > * { right: 0; }
+.fg-bar.flip > * { left: 0; }
+.fg-bar.low > .fill { animation: low-hp .5s steps(2) infinite; }
+@keyframes low-hp { 0% { filter: brightness(1); } 100% { filter: brightness(1.7); } }
+
+/* intro / finale */
+.talking { animation: talking .35s steps(2) infinite; }
+@keyframes talking { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+.letterbox { animation: letterbox .5s ease-out both; }
+@keyframes letterbox { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+.speedlines { background: repeating-conic-gradient(from 0deg at 50% 55%, rgba(255,255,255,.14) 0deg 2deg, transparent 2deg 9deg); animation: spin-slow 6s linear infinite; }
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+.bigword { animation: bigword 1s cubic-bezier(.2,.9,.3,1) both, bigglow 1.2s ease-in-out 1s infinite alternate; }
+@keyframes bigword { 0% { transform: scale(6) rotate(-10deg); opacity: 0; filter: blur(6px); } 45% { transform: scale(.9) rotate(-3deg); opacity: 1; filter: none; } 60%,100% { transform: scale(1) rotate(-3deg); opacity: 1; } }
+@keyframes bigglow { from { filter: drop-shadow(0 0 8px var(--glow)); } to { filter: drop-shadow(0 0 28px var(--glow)) brightness(1.15); } }
+.fin-launch { animation: fin-launch 1.5s cubic-bezier(.2,.8,.4,1) both; }
+@keyframes fin-launch { 0% { transform: translate(0,0) rotate(0); } 40% { transform: translate(calc(var(--dir) * 30px), -55vh) rotate(calc(var(--dir) * 540deg)); } 55% { transform: translate(calc(var(--dir) * 40px), -55vh) rotate(calc(var(--dir) * 600deg)); } 85% { transform: translate(calc(var(--dir) * 60px), 0) rotate(calc(var(--dir) * 720deg)); } 100% { transform: translate(calc(var(--dir) * 60px), 0) rotate(calc(var(--dir) * 720deg)); } }
+.white-flash { animation: white-flash .9s ease-out both; }
+@keyframes white-flash { 0% { opacity: 0; } 10% { opacity: .95; } 100% { opacity: 0; } }
+
 .crt-vignette::after { content: ''; pointer-events: none; position: absolute; inset: 0; z-index: 30; background: radial-gradient(ellipse at center, transparent 62%, rgba(0,0,0,0.45) 100%); }
 
 @media (prefers-reduced-motion: reduce) {

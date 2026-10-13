@@ -24,10 +24,10 @@ export default function Landing({ onStart, best, challenge }) {
       )}
 
       <div className="flex flex-col gap-2.5 w-full max-w-sm sm:max-w-md">
-        <button className="mc-btn mc-btn-green text-lg sm:text-xl py-3" onClick={onStart} autoFocus>▶ Start Boss Fight</button>
+        <button className="mc-btn mc-btn-green text-lg sm:text-xl py-3" onClick={onStart} autoFocus>▶ Choose your fighter</button>
         <div className="mc-dark p-3 text-left">
           <p className="font-pixel text-sm sm:text-base text-white leading-snug">
-            Fight <span className="text-mcaqua">5 office bosses</span> in 10 rounds. Case studies, spot-the-mistake, brain teasers and myths. Pick the smartest answer to fire your arrow. Careful: the obvious answer is often a trap.
+            Create your own fighter, then take on <span className="text-mcaqua">5 office bosses</span> in 10 rounds. Which AI tool for which job? What do you do when your “CEO” calls asking for money? Win a question and you attack. Get it wrong and the boss hits back.
           </p>
         </div>
         <ul className="grid grid-cols-2 gap-2 font-pixel text-sm text-white text-left">
@@ -61,7 +61,7 @@ export default function Landing({ onStart, best, challenge }) {
       </div>
 
       <p className="font-pixel text-xs sm:text-sm text-white/80 mc-text-dark">
-        Keys: 1–4 or A–D to answer · the game moves on by itself
+        Plays full screen · Keys: 1–4 or A–D to answer · Enter skips
         {best && <><br /><span className="text-mcyellow">High score: {best.score}/100 · {best.title}</span></>}
       </p>
     </div>

@@ -42,7 +42,7 @@ export function Toolkit() {
         ))}
       </ul>
       <p className="font-pixel text-sm text-mcgray mt-2">
-        Popular free AI assistants include ChatGPT, Google Gemini and Microsoft Copilot. At work, use the one your company has approved.
+        Examples from the game, not endorsements. Tools change fast. At work, use the ones your company has approved.
       </p>
     </details>
   );

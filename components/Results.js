@@ -1,9 +1,10 @@
 'use client';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { getTitle, roundsFaced } from '@/lib/game.mjs';
 import { TAGLINES } from '@/lib/bosses.mjs';
 import { track } from '@/lib/analytics';
 import Mob from './Mob';
+import { heroModel } from '@/lib/mobs';
 import { Confetti, Hearts } from './ui';
 import { StudyNotes, Toolkit } from './Extras';
 
@@ -26,7 +27,8 @@ async function shareOrCopy({ title, text, url }) {
   return 'copied';
 }
 
-export default function Results({ state, victory, message, newBest, onReplay }) {
+export default function Results({ state, fighter, victory, message, newBest, onReplay }) {
+  const model = useMemo(() => heroModel(fighter), [fighter]);
   const { score, hp, defeated, bestStreak, correct, missed } = state;
   const title = getTitle(score);
   const faced = roundsFaced(state);
@@ -50,7 +52,7 @@ export default function Results({ state, victory, message, newBest, onReplay }) 
   };
 
   return (
-    <div className="relative z-10 space-y-5 max-w-3xl mx-auto py-2">
+    <div className="relative z-10 space-y-5 max-w-3xl mx-auto py-2 pt-12 sm:pt-4">
       {victory && <Confetti />}
       <div className="text-center space-y-2">
         <h2 className={`font-title text-4xl sm:text-6xl animate-vs ${victory ? 'text-mcyellow' : 'text-[#ff5555]'}`} style={{ textShadow: victory ? '4px 4px 0 #3f3f00' : '4px 4px 0 #3f0000' }}>
@@ -64,9 +66,9 @@ export default function Results({ state, victory, message, newBest, onReplay }) 
         {newBest && <span className="absolute top-3 -right-9 rotate-45 bg-mcyellow text-black font-pixel text-xs px-9 py-0.5 border-y-2 border-black">NEW BEST</span>}
         <p className="font-title text-sm text-[#3f3f3f] tracking-widest text-center">🏹 Office Boss Fight</p>
         <div className="flex items-center gap-4 mt-3">
-          <div className="mc-slot p-2 shrink-0"><Mob name="hero" height={72} pose={victory ? 'cheer' : 'ko'} /></div>
+          <div className="mc-slot p-2 shrink-0"><Mob name="hero" model={model} variant={fighter.style} height={72} pose={victory ? 'cheer' : 'idle'} title={fighter.name} /></div>
           <div className="min-w-0">
-            <p className="font-pixel text-sm text-[#555]">Rank earned</p>
+            <p className="font-pixel text-sm text-[#555]">{fighter.name} · rank earned</p>
             <p className="font-title text-xl sm:text-2xl leading-tight text-[#5b2a86]">{title}</p>
             <div className="mt-1"><Hearts hp={hp} size={13} /></div>
           </div>
@@ -88,7 +90,7 @@ export default function Results({ state, victory, message, newBest, onReplay }) 
       </div>
 
       <div className="grid gap-2.5 sm:grid-cols-3 max-w-xl mx-auto">
-        <button className="mc-btn mc-btn-green" onClick={onReplay}>{victory ? '🔁 Play again' : '☠ Respawn'}</button>
+        <button className="mc-btn mc-btn-green" onClick={onReplay}>{victory ? '🔁 Play again' : '☠ Rematch'}</button>
         <button className="mc-btn" onClick={onShare}>📤 Share</button>
         <button className="mc-btn" onClick={onChallenge}>⚔ Challenge</button>
       </div>
